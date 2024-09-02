@@ -4,20 +4,22 @@ from PIL import ImageFilter, Image
 
 
 def unsharp_mask_img(img):
-
     RADIUS = 10
     PERCENT = 300
     THRESHOLD = 3
 
-    img_pil = Image.fromarray(img, 'RGB')
+    img_pil = Image.fromarray(img, "RGB")
 
-    bmp = img_pil.filter(ImageFilter.UnsharpMask(radius = RADIUS, percent = PERCENT, threshold = THRESHOLD))
+    bmp = img_pil.filter(
+        ImageFilter.UnsharpMask(radius=RADIUS, percent=PERCENT, threshold=THRESHOLD)
+    )
 
     return np.array(bmp)
 
 
-def cell_repair(matrix_coordinates, cell_sizes, number_of_cells, width, height, n=3, m=5):
-
+def cell_repair(
+    matrix_coordinates, cell_sizes, number_of_cells, width, height, n=3, m=5
+):
     img_repair = np.zeros((height, width))
 
     mask = np.ones((n, n))
@@ -47,7 +49,8 @@ def cell_repair(matrix_coordinates, cell_sizes, number_of_cells, width, height, 
         # Převod opravené buňky do výsledné matice
         for k in range(height):
             for l in range(width):
-                if (matrix_one_cell[k][l] == True): img_repair[k][l] = i
+                if matrix_one_cell[k][l] == True:
+                    img_repair[k][l] = i
 
     # Odstranění pixelů co se dotýkají stěn
     for i in range(width):
@@ -62,7 +65,6 @@ def cell_repair(matrix_coordinates, cell_sizes, number_of_cells, width, height, 
 
 
 def boundary_to_original_image(img, img_boundary, width, height, color=None):
-
     if color is None:
         color = [255, 255, 255]
 
@@ -78,8 +80,7 @@ def boundary_to_original_image(img, img_boundary, width, height, color=None):
     return img_original_with_boundary
 
 
-def remove_noise(img, mask_size = 3, iterations = 3):
-
+def remove_noise(img, mask_size=3, iterations=3):
     kernel = np.ones((mask_size, mask_size))
 
     # Eroze (zmenšení)
@@ -93,14 +94,13 @@ def remove_noise(img, mask_size = 3, iterations = 3):
     return img
 
 
-def remove_small_regions(img,min_size = 200,is_bin = False):
-
+def remove_small_regions(img, min_size=200, is_bin=False):
     if is_bin:
-        img,_ = mh.label(img)
+        img, _ = mh.label(img)
 
     sizes = mh.labeled.labeled_size(img)
 
-    img_without_small_regions = mh.labeled.remove_regions_where(img,sizes < min_size)
+    img_without_small_regions = mh.labeled.remove_regions_where(img, sizes < min_size)
 
     return img_without_small_regions
 
@@ -115,20 +115,17 @@ def BGR_to_RGB(img):
     return im
 
 
-def boundary_with_centroids(img_boundary,centroids):
-
+def boundary_with_centroids(img_boundary, centroids):
     img = np.copy(img_boundary)
 
-    for i in range(1,centroids.shape[0]):
-
+    for i in range(1, centroids.shape[0]):
         x = int(centroids[i, 0])
         y = int(centroids[i, 1])
 
-        img[y,x] = i
+        img[y, x] = i
 
     return img
 
 
 if __name__ == "__main__":
-
-    print('Hello, home!')
+    print("Hello, home!")

@@ -1,9 +1,9 @@
 import numpy as np
 
 
-def convert_grayscale_to_bin(img, threshold_value = None,less_than = True):
-
-    if threshold_value is None: threshold_value = img.mean()
+def convert_grayscale_to_bin(img, threshold_value=None, less_than=True):
+    if threshold_value is None:
+        threshold_value = img.mean()
 
     if less_than:
         img_bin = img < threshold_value
@@ -13,15 +13,13 @@ def convert_grayscale_to_bin(img, threshold_value = None,less_than = True):
     return img_bin
 
 
-def convert_labeled_to_bin(img, background = 0):
-
+def convert_labeled_to_bin(img, background=0):
     img_bin = img != background
 
     return img_bin
 
 
 def convert_RGB_to_grayscale(img, width, height, W=None):
-
     if W is None:
         W = [1 / 3, 1 / 3, 1 / 3]
 
@@ -38,14 +36,12 @@ def convert_RGB_to_grayscale(img, width, height, W=None):
 
 
 def separate_layers(img):
-
-    L0 = img[:,:,0]
-    L1 = img[:,:,1]
-    L2 = img[:,:,2]
+    L0 = img[:, :, 0]
+    L1 = img[:, :, 1]
+    L2 = img[:, :, 2]
 
     return L0, L1, L2
 
 
 if __name__ == "__main__":
-
-    print('Hello, home!')
+    print("Hello, home!")
