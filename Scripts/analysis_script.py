@@ -52,8 +52,9 @@ def analysis(data_path, output_path, note=None):
 
     try:
         list_of_input_data = get_names_from_directory(data_path)
-    except:
-        print("Something wrong with input path")
+        print("Success with input path")
+    except Exception as e:
+        print("Something wrong with input path | ", e)
         return
 
     N = len(list_of_input_data)
@@ -62,17 +63,20 @@ def analysis(data_path, output_path, note=None):
         default_output_path = create_directories_for_results(
             output_path, N, list_of_input_data, note
         )
+        print("Success with output path")
     except:
         print("Something wrong with output path")
         return
 
     for i in range(N):
+        print(f"Analysis of {list_of_input_data[i]} just started")
         output_path = default_output_path + f"{list_of_input_data[i]}/"
 
         try:
             input_data = data_path + list_of_input_data[i]
             img = cv2.imread(input_data)
             img = iw.BGR_to_RGB(img)
+            print("Success with input data")
         except:
             print("Something wrong with input data")
             continue
@@ -253,8 +257,6 @@ def process_1(img, output_path):
 
 
 if __name__ == "__main__":
-    print("Hello, home!")
-
     for f in ["00_all_images"]:
         t0 = datetime.datetime.now()
 

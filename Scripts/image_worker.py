@@ -4,6 +4,11 @@ from PIL import ImageFilter, Image
 
 
 def unsharp_mask_img(img):
+    """Unsharp masking je technika zvyšující ostrost obrázku.
+    Vytvoří se kopie obrázku, která je rozostřená a následně se od původního obrázku odečte.
+    Výsledný obrázek je ostřejší.
+    Vedlejším efektem může být vytvoření nechtěného šumu.
+    """
     RADIUS = 10
     PERCENT = 300
     THRESHOLD = 3
