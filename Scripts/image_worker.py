@@ -54,7 +54,7 @@ def cell_repair(
         # Převod opravené buňky do výsledné matice
         for k in range(height):
             for l in range(width):
-                if matrix_one_cell[k][l] == True:
+                if matrix_one_cell[k][l] == True:  # noqa: E712 při záměně na `is True` se chová jinak
                     img_repair[k][l] = i
 
     # Odstranění pixelů co se dotýkají stěn

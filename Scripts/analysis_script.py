@@ -245,8 +245,10 @@ def process_1(img, output_path):
     # -------------------- Shape Descriptors ------------------------
     #'''
     descriptor_mask = [True, True, True, False, True, False, True, True, True]
-
-    sd.analysis(img_final, width, height, output_path, descriptor_mask)
+    try:
+        sd.analysis(img_final, width, height, output_path, descriptor_mask)
+    except ValueError as e:
+        print("Error in shape descriptors | ", e)
     #'''
 
     # ----------------------- Histograms ---------------------------
@@ -257,7 +259,7 @@ def process_1(img, output_path):
 
 
 if __name__ == "__main__":
-    for f in ["00_all_images"]:
+    for f in ["02_single_img"]:
         t0 = datetime.datetime.now()
 
         DATA_PATH = f"../Images/{f}/"
