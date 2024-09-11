@@ -69,9 +69,7 @@ def cell_repair(
     return img_repair
 
 
-def boundary_to_original_image(img, img_boundary, width, height, color=None):
-    if color is None:
-        color = [255, 255, 255]
+def boundary_to_original_image(img, img_boundary, width, height, color=[255, 0, 0]):
 
     img_original_with_boundary = np.copy(img)
 
