@@ -14,8 +14,38 @@ pandas = "^2.2.3"
 pillow = "^10.4.0"
 scikit-image = "^0.24.0"
 opencv-python = "^4.10.0.84"
+colorcorrect = "^0.9.1"
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["ALL"]
+exclude = ["*.ipynb", "__init__.py"]
+ignore = [
+    "FA102",
+    "D211",
+    "D213",
+    "COM812",
+    "ISC001",
+    "BLE001",
+    "D203",
+    "B008",
+    "PLR0913",
+    "FBT001",
+    "N805",
+    "TD002",
+    "TD003",
+    "FIX002",
+    "DTZ005",
+    "RUF013",
+    "FBT002",
+    "S113",
+    "PLC2401",
+    ]
