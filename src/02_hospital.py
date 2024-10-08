@@ -1,23 +1,22 @@
-import os
-import cv2
 import datetime
-import numpy as np
+import os
+
+import colorcorrect.algorithm as cca
+import cv2
 import mahotas as mh
 import matplotlib.pyplot as plt
-import colorcorrect.algorithm as cca
-
-
+import numpy as np
+from loguru import logger
 from skimage import filters
 
-
 import convert_worker as cw
-import visual_worker as vw
 import image_worker as iw
 import shape_descriptors as sd
 
 # import coef_worker as cow
 # import comparator as com
 import something as s
+import visual_worker as vw
 
 
 def get_names_from_directory(base_path):
@@ -57,12 +56,12 @@ def create_directories_for_results(path, N, list_of_input_data, note):
 
 
 def analysis(data_path, output_path, note=""):
-    print("Analysis just started")
+    logger.info("STARTING ANALYSIS")
 
     try:
         list_of_input_data = get_names_from_directory(data_path)
     except:
-        print("Something wrong with input path")
+        logger.error("Something wrong with input path")
         return
 
     N = len(list_of_input_data)
@@ -72,7 +71,9 @@ def analysis(data_path, output_path, note=""):
             output_path, N, list_of_input_data, note
         )
     except:
-        print("Something wrong with output path")
+        logger.warning("Missing output path -> Creating default one")
+        default_output_path = f"../Results/Analysis_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}/"
+        os.mkdir(default_output_path)
         return
 
     for i in range(N):
@@ -1360,12 +1361,11 @@ if __name__ == "__main__":
     #'''
     start_time = datetime.datetime.now()
 
-    DATA_PATH = "../Images/Hospital/bal_11_2021_labeled/"
-    OUTPUT_PATH = "../Results/Hospital/"
+    DATA_PATH = "../Images/BAL_image2/"
+    OUTPUT_PATH = "../Results/"
     NOTE = "bal_labeled"
 
     analysis(DATA_PATH, OUTPUT_PATH, NOTE)
 
     finish_time = datetime.datetime.now()
-    print(str(finish_time - start_time))
-    #'''
+    logger.info(str(finish_time - start_time))
