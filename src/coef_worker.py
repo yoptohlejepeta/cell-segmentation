@@ -21,7 +21,3 @@ def compute_ratio_mask_img(color_number, width, height):
     ratio = color_number / (width * height)
 
     return ratio
-
-
-if __name__ == "__main__":
-    print("Hello home")

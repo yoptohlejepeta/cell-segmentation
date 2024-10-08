@@ -289,39 +289,3 @@ def convert_to_bin_by_horizontal_threshold(img, threshold_freq, width, height, b
                 img_bin[i, j] = 0
 
     return img_bin
-
-
-for i in range(10000):
-    pass
-
-if __name__ == "__main__":
-    print("Hello home")
-    import numpy
-
-    print(numpy.version.version)
-
-    # všechny odstíny barev
-    """
-        h = 256**3
-        w = 1
-        d = 3
-
-        ar = np.zeros((h,w,d))
-
-        r = 0
-        g = 0
-        b = 0
-
-        for i in range(h):
-            ar[i][0][0] = r
-            ar[i][0][1] = g
-            ar[i][0][2] = b
-
-            r = r + 1
-            if(r > 255):
-                r = 0
-                g = g + 1
-                if(g > 255):
-                    g = 0
-                    b = b + 1
-        #"""

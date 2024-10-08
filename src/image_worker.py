@@ -556,9 +556,3 @@ def fill_boundaries(img_bin):
     img_bin[ndimage.binary_fill_holes(img_bin)] = 1
 
     return img_bin
-
-
-if __name__ == "__main__":
-    print("Hello home")
-
-    print((np.zeros.__name__))

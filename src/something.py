@@ -372,12 +372,3 @@ def analysis(data_path, output_path):
 
         save_xyz(fn, output_path, name_fn)
         save_xyz(bz, output_path, name_bz)
-
-
-if __name__ == "__main__":
-    print("Hello home!")
-
-    DATA_PATH = "../Images/Hospital/cubes/"
-    OUTPUT_PATH = "../Results/Hospital/cube_intersection/"
-
-    analysis(DATA_PATH, OUTPUT_PATH)

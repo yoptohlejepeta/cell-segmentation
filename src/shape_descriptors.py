@@ -624,7 +624,3 @@ def analysis(img_labeled, width, height, output_path, descriptor_mask, exclude_f
 
     plt.imsave(f"{output_path}IMG/51_Rotated_cells.jpg", img_rotated_cells, cmap="jet")
     img_of_vectors.save((f"{output_path}IMG/50_Major_axis.jpg"))
-
-
-if __name__ == "__main__":
-    print("Hello home")

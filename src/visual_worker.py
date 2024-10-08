@@ -196,7 +196,3 @@ def array_2d_to_txt(img, width, height, output_path, name):
         if i < height - 1:
             file.write(f"\n")
     file.close()
-
-
-if __name__ == "__main__":
-    print("Hello home")

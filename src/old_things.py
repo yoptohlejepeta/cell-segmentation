@@ -2934,7 +2934,3 @@ def reidentifikator(bunky, n):
         output.write(f"{a[i]}")
 
     output.close()
-
-
-if __name__ == "__main__":
-    print("Hello home")
