@@ -1,7 +1,7 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import os
+
 import mahotas as mh
+import numpy as np
 
 
 def get_names_from_directory(base_path):
@@ -15,8 +15,7 @@ def get_names_from_directory(base_path):
 
 
 def color_cube(img, name, output_path):
-    """
-    Metoda vytvoří tvz. color cube
+    """Metoda vytvoří tvz. color cube
     R -> X
     G -> Y
     B -> Z
@@ -29,7 +28,6 @@ def color_cube(img, name, output_path):
     :param save_cube_img: jestli uložit cube_labels
     :return: None
     """
-
     width = img.shape[1]
     height = img.shape[0]
 
@@ -124,14 +122,14 @@ def color_cube(img, name, output_path):
                     file.write(f"\n{e[el]}\t{x}\t{y}\t{z}")
                     cube_labels[x][y][z] = int(el + 1)
 
-    file.write(f"\nAu\t0\t0\t0")
-    file.write(f"\nAu\t0\t255\t0")
-    file.write(f"\nAu\t0\t0\t255")
-    file.write(f"\nAu\t0\t255\t255")
-    file.write(f"\nAu\t255\t0\t0")
-    file.write(f"\nAu\t255\t255\t0")
-    file.write(f"\nAu\t255\t0\t255")
-    file.write(f"\nAu\t255\t255\t255")
+    file.write("\nAu\t0\t0\t0")
+    file.write("\nAu\t0\t255\t0")
+    file.write("\nAu\t0\t0\t255")
+    file.write("\nAu\t0\t255\t255")
+    file.write("\nAu\t255\t0\t0")
+    file.write("\nAu\t255\t255\t0")
+    file.write("\nAu\t255\t0\t255")
+    file.write("\nAu\t255\t255\t255")
 
     file.close()
 
@@ -139,8 +137,7 @@ def color_cube(img, name, output_path):
 
 
 def color_cube_2(img):
-    """
-    Metoda vytvoří tvz. color cube
+    """Metoda vytvoří tvz. color cube
     R -> X
     G -> Y
     B -> Z
@@ -153,7 +150,6 @@ def color_cube_2(img):
     :param save_cube_img: jestli uložit cube_labels
     :return: None
     """
-
     width = img.shape[1]
     height = img.shape[0]
 
@@ -342,14 +338,14 @@ def save_xyz(cube, output_path, name):
                 if cube[x, y, z] != 0:
                     file.write(f"\n{e[int(cube[x, y, z]-1)]}\t{x}\t{y}\t{z}")
 
-    file.write(f"\nAu\t0\t0\t0")
-    file.write(f"\nAu\t0\t255\t0")
-    file.write(f"\nAu\t0\t0\t255")
-    file.write(f"\nAu\t0\t255\t255")
-    file.write(f"\nAu\t255\t0\t0")
-    file.write(f"\nAu\t255\t255\t0")
-    file.write(f"\nAu\t255\t0\t255")
-    file.write(f"\nAu\t255\t255\t255")
+    file.write("\nAu\t0\t0\t0")
+    file.write("\nAu\t0\t255\t0")
+    file.write("\nAu\t0\t0\t255")
+    file.write("\nAu\t0\t255\t255")
+    file.write("\nAu\t255\t0\t0")
+    file.write("\nAu\t255\t255\t0")
+    file.write("\nAu\t255\t0\t255")
+    file.write("\nAu\t255\t255\t255")
 
     file.close()
 

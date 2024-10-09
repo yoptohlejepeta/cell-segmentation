@@ -30,23 +30,14 @@ line-length = 100
 select = ["ALL"]
 exclude = ["*.ipynb", "__init__.py"]
 ignore = [
-    "FA102",
-    "D211",
-    "D213",
-    "COM812",
-    "ISC001",
-    "BLE001",
-    "D203",
-    "B008",
-    "PLR0913",
-    "FBT001",
-    "N805",
-    "TD002",
-    "TD003",
-    "FIX002",
-    "DTZ005",
-    "RUF013",
-    "FBT002",
-    "S113",
-    "PLC2401",
+    "FA102", # future required annotation
+    "COM812", # trailing comma
+    "ISC001", # single line implicit string concatenation
+    "D203", # one-blank-line-before-class
+    "B008", # function-call-in-default-argument
+    "PLR0913", # too many arguments
+    "TD002", # missing todo author
+    "TD003", # missing todo link
+    "FIX002", # line contains todo
+    "DTZ005", # call datetime now without tzinfo
     ]

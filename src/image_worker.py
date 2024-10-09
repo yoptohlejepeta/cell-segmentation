@@ -1,7 +1,6 @@
-import numpy as np
 import mahotas as mh
-from PIL import ImageFilter, Image, ImageDraw
-import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image, ImageDraw, ImageFilter
 from scipy import ndimage
 
 # Moje scripty
@@ -87,7 +86,7 @@ def get_relabeled_image(img_labeled, width, height, exclude_first_index=True):
 
     number_of_labels = sizes.shape[0]
 
-    label_array = np.zeros((number_of_labels))
+    label_array = np.zeros(number_of_labels)
 
     for i in range(start_index, number_of_labels):
         if sizes[i] != 0:
@@ -184,7 +183,7 @@ def relabeling_sort(img_labeled, width, height):
 
     n = sizes.shape[0]
 
-    label_array = np.zeros((n))
+    label_array = np.zeros(n)
 
     k = 1
 
@@ -417,10 +416,7 @@ def check_cytoplasm_by_average_value_of_nuclei(
             x = coordinates_of_cytoplasm[i][j]
             y = coordinates_of_cytoplasm[i][j + 1]
 
-            if i >= number_of_nuclei:
-                img_labeled[y][x] = i
-
-            elif left < img[y][x] < right:
+            if i >= number_of_nuclei or left < img[y][x] < right:
                 img_labeled[y][x] = i
 
     return img_labeled

@@ -1,7 +1,7 @@
-import numpy as np
-import mahotas as mh
 import math
 
+import mahotas as mh
+import numpy as np
 
 # Dictionary
 color_extremes_min = {
@@ -271,7 +271,7 @@ def convert_img_to_norm_img(img, color_system_key):
 
 
 def convert_to_bin_by_horizontal_threshold(img, threshold_freq, width, height, bins=100):
-    freq = np.zeros((bins))
+    freq = np.zeros(bins)
     divisor = 1 / bins
     img_labeled = np.zeros((height, width))
     img_bin = np.ones((height, width))

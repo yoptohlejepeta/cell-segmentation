@@ -1,4 +1,3 @@
-from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -194,5 +193,5 @@ def array_2d_to_txt(img, width, height, output_path, name):
         for j in range(width):
             file.write(f"{int(img[i, j])} ")
         if i < height - 1:
-            file.write(f"\n")
+            file.write("\n")
     file.close()

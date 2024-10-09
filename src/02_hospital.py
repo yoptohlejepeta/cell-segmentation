@@ -12,9 +12,6 @@ from skimage import filters
 import convert_worker as cw
 import image_worker as iw
 import shape_descriptors as sd
-
-# import coef_worker as cow
-# import comparator as com
 import something as s
 import visual_worker as vw
 
@@ -72,9 +69,11 @@ def analysis(data_path, output_path, note=""):
         )
     except:
         logger.warning("Missing output path -> Creating default one")
-        default_output_path = f"../Results/Analysis_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}/"
+        # os.mkdir("../Results/")
+        default_output_path = (
+            f"../Results/Analysis_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}/"
+        )
         os.mkdir(default_output_path)
-        return
 
     for i in range(N):
         # nastavení výstupní cesty pro daný obrázek
@@ -95,8 +94,7 @@ def analysis(data_path, output_path, note=""):
 
 
 def img_processing_2(img, output_path):
-    """
-    metoda bude využívat knihovnu PIL na zlepšení hledání jader
+    """Metoda bude využívat knihovnu PIL na zlepšení hledání jader
     metoda bude využívat knihovnu Colorcorret na zredukování nežádoucího osvětlení na snímku
 
     na hledání cytoplazmy se použije green channel ( zvláštní ale funguje to )
@@ -108,7 +106,6 @@ def img_processing_2(img, output_path):
     :param output_path: (string) cesta kam se budou ukládat výsledky
     :return: None
     """
-
     width = img.shape[1]
     height = img.shape[0]
 
@@ -401,11 +398,10 @@ def img_processing_2(img, output_path):
 
 
 def img_processing_3(img, output_path):
-    """
-    metoda bude využívat knihovnu PIL na zlepšení hledání jader
-    metoda bude využívat knihovnu Colorcorret na zredukování nežádoucího osvětlení na snímku
+    """Metoda bude využívat knihovnu PIL na zlepšení hledání jader.
 
-    na hledání cytoplazmy se použije green channel ( zvláštní ale funguje to )
+    Metoda bude využívat knihovnu Colorcorret na zredukování nežádoucího osvětlení na snímku.
+    Na hledání cytoplazmy se použije green channel ( zvláštní ale funguje to )
 
     jádra - červeně
     cytoplazmu - zeleně
@@ -414,10 +410,10 @@ def img_processing_3(img, output_path):
     :param output_path: (string) cesta kam se budou ukládat výsledky
     :return: None
     """
-
     width = img.shape[1]
     height = img.shape[0]
 
+    print(f"{output_path}IMG/00_input_img.jpg")
     plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
 
     # ------------------ Zde kód pro analýzu ------------------------
@@ -724,8 +720,7 @@ def img_processing_3(img, output_path):
 
 
 def img_processing_2_part(img, output_path):
-    """
-    na hledání jader blue channel
+    """Na hledání jader blue channel
     na hledání cytoplazmy se použije green channel ( zvláštní ale funguje to )
 
     jádra - červeně
@@ -735,7 +730,6 @@ def img_processing_2_part(img, output_path):
     :param output_path: (string) cesta kam se budou ukládat výsledky
     :return: None
     """
-
     width = img.shape[1]
     height = img.shape[0]
 
@@ -808,8 +802,7 @@ def img_processing_2_part(img, output_path):
 
 
 def color_balancing(img, output_path):
-    """
-    Metoda kterou vužívám nemazat je dobrá
+    """Metoda kterou vužívám nemazat je dobrá
     vezme snímek u udělá na něm všechny metody na color balancing atd který zatím znám
 
     funguje dobře pro tuto verzi numpy
@@ -819,7 +812,6 @@ def color_balancing(img, output_path):
     :param output_path: cesta kam se uloží
     :return: None
     """
-
     width = img.shape[1]
     height = img.shape[0]
 
@@ -876,8 +868,7 @@ def color_balancing(img, output_path):
 
 
 def cytoplasm_RGB_channels(img, output_path):
-    """
-    Hledání vhodného kanálu na hledání cytoplazmy
+    """Hledání vhodného kanálu na hledání cytoplazmy
 
     cytoplazmu - zeleně
 
@@ -885,7 +876,6 @@ def cytoplasm_RGB_channels(img, output_path):
     :param output_path: (string) cesta kam se budou ukládat výsledky
     :return: None
     """
-
     width = img.shape[1]
     height = img.shape[0]
 
@@ -981,8 +971,7 @@ def cytoplasm_RGB_channels(img, output_path):
 
 
 def nuclei_RGB_channels(img, output_path):
-    """
-    Metoda zkouší knihovnu PIL na úpravu snímku a následně otsu na binarizaci
+    """Metoda zkouší knihovnu PIL na úpravu snímku a následně otsu na binarizaci
     binarizace se provásí na všechny 3 kanály (R,G,B)
 
     z výsledků jde vidět že blue channel je nejlepší pro identifikaci jader
@@ -991,7 +980,6 @@ def nuclei_RGB_channels(img, output_path):
     :param output_path: cesta
     :return: None
     """
-
     width = img.shape[1]
     height = img.shape[0]
 
@@ -1083,8 +1071,7 @@ def nuclei_RGB_channels(img, output_path):
 
 
 def representation_in_xyz(img, output_path):
-    """
-    Metoda vygeneruje soubor *.xyz
+    """Metoda vygeneruje soubor *.xyz
     R -> x
     G -> y
     B -> z
@@ -1092,7 +1079,6 @@ def representation_in_xyz(img, output_path):
     :param output_path:
     :return:
     """
-
     width = img.shape[1]
     height = img.shape[0]
 
@@ -1117,8 +1103,7 @@ def representation_in_xyz(img, output_path):
 
 
 def rel_representation_in_xyz(img, output_path):
-    """
-    Metoda vygeneruje soubor *.xyz
+    """Metoda vygeneruje soubor *.xyz
     R -> x
     G -> y
     B -> z
@@ -1127,7 +1112,6 @@ def rel_representation_in_xyz(img, output_path):
     :param output_path:
     :return:
     """
-
     width = img.shape[1]
     height = img.shape[0]
 
@@ -1225,14 +1209,14 @@ def rel_representation_in_xyz(img, output_path):
                     file.write(f"\n{e[el]}\t{x}\t{y}\t{z}")
                     cube_labels[x][y][z] = int(el + 1)
 
-    file.write(f"\nAu\t0\t0\t0")
-    file.write(f"\nAu\t0\t255\t0")
-    file.write(f"\nAu\t0\t0\t255")
-    file.write(f"\nAu\t0\t255\t255")
-    file.write(f"\nAu\t255\t0\t0")
-    file.write(f"\nAu\t255\t255\t0")
-    file.write(f"\nAu\t255\t0\t255")
-    file.write(f"\nAu\t255\t255\t255")
+    file.write("\nAu\t0\t0\t0")
+    file.write("\nAu\t0\t255\t0")
+    file.write("\nAu\t0\t0\t255")
+    file.write("\nAu\t0\t255\t255")
+    file.write("\nAu\t255\t0\t0")
+    file.write("\nAu\t255\t255\t0")
+    file.write("\nAu\t255\t0\t255")
+    file.write("\nAu\t255\t255\t255")
 
     file.close()
 
@@ -1258,8 +1242,7 @@ def rel_representation_in_xyz(img, output_path):
 
 
 def color_cube_in_otsu_mask(img, output_path):
-    """
-    Metoda vytvoří color_cube pouze v masce otsu bohužel jak mám asi spojit 3D a 2D ?
+    """Metoda vytvoří color_cube pouze v masce otsu bohužel jak mám asi spojit 3D a 2D ?
 
     Metoda vygeneruje soubor *.xyz
     R -> x
@@ -1270,7 +1253,6 @@ def color_cube_in_otsu_mask(img, output_path):
     :param output_path:
     :return:
     """
-
     width = img.shape[1]
     height = img.shape[0]
 
@@ -1297,9 +1279,7 @@ def color_cube_in_otsu_mask(img, output_path):
 
 
 def nucleus(img, output_path):
-    """
-
-    :param img:
+    """:param img:
     :param output_path:
     :return:
     """
@@ -1352,16 +1332,13 @@ def nucleus(img, output_path):
     )
     plt.imsave(f"{output_path}IMG/18_boundary_in_original_img.jpg", img_boundary_in_original)
 
-    # current_img = np.loadtxt(f'{current_path}CSV_TXT/bin_img.txt').astype(np.uint8)
-
-    return None
-
 
 if __name__ == "__main__":
     #'''
     start_time = datetime.datetime.now()
 
-    DATA_PATH = "../Images/BAL_image2/"
+    # DATA_PATH = "../Images/BAL_image2/"
+    DATA_PATH = "../Images/image/"
     OUTPUT_PATH = "../Results/"
     NOTE = "bal_labeled"
 

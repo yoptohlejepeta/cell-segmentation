@@ -1,14 +1,15 @@
-from skimage.morphology import convex_hull_image
-from PIL import Image, ImageDraw
-import matplotlib.pyplot as plt
+import math
+
 import mahotas as mh
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import math
+from PIL import Image, ImageDraw
+from skimage.morphology import convex_hull_image
 
 
 def get_compactness(cell_sizes, perimeter, number_of_cells, exclude_first_index=True):
-    info_compactness = np.zeros((number_of_cells))
+    info_compactness = np.zeros(number_of_cells)
 
     if exclude_first_index:
         start_index = 1
@@ -24,7 +25,7 @@ def get_compactness(cell_sizes, perimeter, number_of_cells, exclude_first_index=
 def get_rectangularity(
     major_axis_length, minor_axis_length, cell_sizes, number_of_cells, exclude_first_index=True
 ):
-    info_rectangularity = np.zeros((number_of_cells))
+    info_rectangularity = np.zeros(number_of_cells)
 
     if exclude_first_index:
         start_index = 1
@@ -40,7 +41,7 @@ def get_rectangularity(
 def get_eccentricity(
     major_axis_length, minor_axis_length, number_of_cells, exclude_first_index=True
 ):
-    info_eccentricity = np.zeros((number_of_cells))
+    info_eccentricity = np.zeros(number_of_cells)
 
     if exclude_first_index:
         start_index = 1
@@ -56,7 +57,7 @@ def get_eccentricity(
 def get_elongation(
     bounding_box_height, bounding_box_width, number_of_cells, exclude_first_index=True
 ):
-    info_elongation = np.zeros((number_of_cells))
+    info_elongation = np.zeros(number_of_cells)
 
     if exclude_first_index:
         start_index = 1
@@ -70,7 +71,7 @@ def get_elongation(
 
 
 def get_roundness(convex_hull_perimeter, cell_sizes, number_of_cells, exclude_first_index=True):
-    info_roundness = np.zeros((number_of_cells))
+    info_roundness = np.zeros(number_of_cells)
 
     if exclude_first_index:
         start_index = 1
@@ -84,7 +85,7 @@ def get_roundness(convex_hull_perimeter, cell_sizes, number_of_cells, exclude_fi
 
 
 def get_convexity(convex_hull_perimeter, perimeter, number_of_cells, exclude_first_index=True):
-    info_convexity = np.zeros((number_of_cells))
+    info_convexity = np.zeros(number_of_cells)
 
     if exclude_first_index:
         start_index = 1
@@ -98,7 +99,7 @@ def get_convexity(convex_hull_perimeter, perimeter, number_of_cells, exclude_fir
 
 
 def get_solidity(convex_hull_sizes, cell_sizes, number_of_cells, exclude_first_index=True):
-    info_solidity = np.zeros((number_of_cells))
+    info_solidity = np.zeros(number_of_cells)
 
     if exclude_first_index:
         start_index = 1
@@ -112,8 +113,8 @@ def get_solidity(convex_hull_sizes, cell_sizes, number_of_cells, exclude_first_i
 
 
 def get_curl(major_axis_length, perimeter, cell_sizes, number_of_cells, exclude_first_index=True):
-    info_curl = np.zeros((number_of_cells))
-    fibre_length = np.zeros((number_of_cells))
+    info_curl = np.zeros(number_of_cells)
+    fibre_length = np.zeros(number_of_cells)
 
     if exclude_first_index:
         start_index = 1
@@ -134,10 +135,10 @@ def get_sphericity(
     number_of_cells,
     exclude_first_index=True,
 ):
-    info_sphericity = np.zeros((number_of_cells))
+    info_sphericity = np.zeros(number_of_cells)
 
-    r_inner = np.zeros((number_of_cells))
-    r_outer = np.zeros((number_of_cells))
+    r_inner = np.zeros(number_of_cells)
+    r_outer = np.zeros(number_of_cells)
 
     if exclude_first_index:
         start_index = 1
@@ -156,11 +157,9 @@ def get_sphericity(
                 + (centroids[i][1] - coordinates_of_boundary_pixels[i][k + 1]) ** 2
             ) ** (1 / 2)
 
-            if r > r_outer[i]:
-                r_outer[i] = r
+            r_outer[i] = max(r, r_outer[i])
 
-            if r < r_inner[i]:
-                r_inner[i] = r
+            r_inner[i] = min(r, r_inner[i])
 
     for i in range(start_index, number_of_cells):
         info_sphericity[i] = r_inner[i] / r_outer[i]
@@ -233,7 +232,7 @@ def get_major_axis_vector(
 
 
 def get_major_axis_angle(major_axis_vector, number_of_cells, exclude_first_index=True):
-    major_axis_angle = np.zeros((number_of_cells))
+    major_axis_angle = np.zeros(number_of_cells)
 
     if exclude_first_index:
         start_index = 1
@@ -252,7 +251,7 @@ def get_major_axis_angle(major_axis_vector, number_of_cells, exclude_first_index
 
 
 def get_major_axis_length(major_axis_vector, number_of_cells, exclude_first_index=True):
-    major_axis_length = np.zeros((number_of_cells))
+    major_axis_length = np.zeros(number_of_cells)
 
     if exclude_first_index:
         start_index = 1
@@ -324,7 +323,7 @@ def get_minor_axis_length(
     exclude_first_index=True,
 ):
     minor_axis_length = np.zeros(
-        (number_of_cells)
+        number_of_cells
     )  # jen  vzdálenost nic víc pro analýzu tvarů nepotřebuji
 
     if exclude_first_index:
@@ -475,7 +474,7 @@ def get_coordinates_of_pixels(img_labeled, cell_sizes, number_of_cells, width, h
     matrix_coordinates = np.zeros((matrix_height, matrix_width), dtype=int)
 
     # Matice pro uložení počtu souřadnic které jsem již použil
-    matrix_shifts = np.zeros((number_of_cells))
+    matrix_shifts = np.zeros(number_of_cells)
 
     for i in range(height):
         for j in range(width):
@@ -623,4 +622,4 @@ def analysis(img_labeled, width, height, output_path, descriptor_mask, exclude_f
     df_shape_des.to_csv(f"{output_path}CSV_TXT/Shape descriptors.csv", index=False, header=True)
 
     plt.imsave(f"{output_path}IMG/51_Rotated_cells.jpg", img_rotated_cells, cmap="jet")
-    img_of_vectors.save((f"{output_path}IMG/50_Major_axis.jpg"))
+    img_of_vectors.save(f"{output_path}IMG/50_Major_axis.jpg")
