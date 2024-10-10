@@ -618,8 +618,8 @@ def analysis(img_labeled, width, height, output_path, descriptor_mask, exclude_f
         )
         df_shape_des["Sphericity"] = sphericity[start_index:]
 
-    df_info.to_csv(f"{output_path}CSV_TXT/Information.csv", index=False, header=True)
-    df_shape_des.to_csv(f"{output_path}CSV_TXT/Shape descriptors.csv", index=False, header=True)
+    # df_info.to_csv(f"{output_path}CSV_TXT/Information.csv", index=False, header=True)
+    # df_shape_des.to_csv(f"{output_path}CSV_TXT/Shape descriptors.csv", index=False, header=True)
 
     plt.imsave(f"{output_path}IMG/51_Rotated_cells.jpg", img_rotated_cells, cmap="jet")
     img_of_vectors.save(f"{output_path}IMG/50_Major_axis.jpg")

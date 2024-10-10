@@ -9,11 +9,11 @@ import numpy as np
 from loguru import logger
 from skimage import filters
 
-import convert_worker as cw
-import image_worker as iw
-import shape_descriptors as sd
-import something as s
-import visual_worker as vw
+import src.convert_worker as cw
+import src.image_worker as iw
+import src.shape_descriptors as sd
+import src.something as s
+import src.visual_worker as vw
 
 
 def get_names_from_directory(base_path):
@@ -38,12 +38,10 @@ def create_directories_for_results(path, N, list_of_input_data, note):
 
         path_images = f"{n_path}IMG/"
         path_graphs = f"{n_path}GRAPHS/"
-        path_col_sys = f"{n_path}COLOR_SYSTEMS/"
         path_csv = f"{n_path}CSV_TXT/"
 
         os.mkdir(path_images)
         os.mkdir(path_graphs)
-        os.mkdir(path_col_sys)
         os.mkdir(path_csv)
 
     path_summary = f"{path}SUMMARY/"
@@ -57,7 +55,7 @@ def analysis(data_path, output_path, note=""):
 
     try:
         list_of_input_data = get_names_from_directory(data_path)
-    except:
+    except Exception as e:
         logger.error("Something wrong with input path")
         return
 
@@ -67,7 +65,7 @@ def analysis(data_path, output_path, note=""):
         default_output_path = create_directories_for_results(
             output_path, N, list_of_input_data, note
         )
-    except:
+    except Exception as e:
         logger.warning("Missing output path -> Creating default one")
         # os.mkdir("../Results/")
         default_output_path = (
@@ -83,7 +81,8 @@ def analysis(data_path, output_path, note=""):
         try:
             input_data = data_path + list_of_input_data[i]
             img = mh.imread(input_data)
-        except:
+        except Exception as e:
+            print(e)
             print("Something wrong with input data or input path")
             continue
 
@@ -94,10 +93,10 @@ def analysis(data_path, output_path, note=""):
 
 
 def img_processing_2(img, output_path):
-    """Metoda bude využívat knihovnu PIL na zlepšení hledání jader
-    metoda bude využívat knihovnu Colorcorret na zredukování nežádoucího osvětlení na snímku
+    """Metoda bude využívat knihovnu PIL na zlepšení hledání jader.
 
-    na hledání cytoplazmy se použije green channel ( zvláštní ale funguje to )
+    Metoda bude využívat knihovnu Colorcorret na zredukování nežádoucího osvětlení na snímku.
+    Na hledání cytoplazmy se použije green channel ( zvláštní ale funguje to ). # TODO: :D
 
     jádra - červeně
     cytoplazmu - zeleně

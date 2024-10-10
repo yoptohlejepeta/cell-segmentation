@@ -1,8 +1,13 @@
-# Segmentace buněk ze snímků pořízených fluorescenčním mikroskopem (FORK)
+# Cell segmentation
 
-Spuštění skriptu:
+## Install dependencies
 
 ```bash
-cd src/
-poetry run python 02_hospital.py
+poetry install
+```
+
+## Run script
+
+```bash
+poetry run python main.py --image_dir IMAGE_DIR --output_dir OUTPUT_DIR
 ```

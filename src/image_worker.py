@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw, ImageFilter
 from scipy import ndimage
 
 # Moje scripty
-import convert_worker as cw
+import src.convert_worker as cw
 
 
 def color_gradient(img, width, height):
