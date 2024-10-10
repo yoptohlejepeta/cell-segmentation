@@ -13,7 +13,7 @@ import src.convert_worker as cw
 import src.image_worker as iw
 import src.shape_descriptors as sd
 import src.something as s
-import src.visual_worker as vw
+# import src.visual_worker as vw
 
 
 def get_names_from_directory(base_path):
@@ -37,20 +37,30 @@ def create_directories_for_results(path, N, list_of_input_data, note):
         os.mkdir(n_path)
 
         path_images = f"{n_path}IMG/"
-        path_graphs = f"{n_path}GRAPHS/"
-        path_csv = f"{n_path}CSV_TXT/"
+        # path_graphs = f"{n_path}GRAPHS/"
+        # path_csv = f"{n_path}CSV_TXT/"
 
         os.mkdir(path_images)
-        os.mkdir(path_graphs)
-        os.mkdir(path_csv)
+        # os.mkdir(path_graphs)
+        # os.mkdir(path_csv)
 
-    path_summary = f"{path}SUMMARY/"
-    os.mkdir(path_summary)
+    # path_summary = f"{path}SUMMARY/"
+    # os.mkdir(path_summary)
 
     return path
 
 
-def analysis(data_path, output_path, note=""):
+def analysis(data_path: str, output_path: str, note: str = "") -> None:
+    """Check the input and output paths.
+
+    Then proceed to process the images.
+
+    Args:
+        data_path (str): Directory with images to be processed.
+        output_path (str): Directory where the results will be saved.
+        note (str, optional): Note to be added to the output directory name. Defaults to "".
+
+    """
     logger.info("STARTING ANALYSIS")
 
     try:
@@ -67,7 +77,6 @@ def analysis(data_path, output_path, note=""):
         )
     except Exception as e:
         logger.warning("Missing output path -> Creating default one")
-        # os.mkdir("../Results/")
         default_output_path = (
             f"../Results/Analysis_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}/"
         )
@@ -83,13 +92,13 @@ def analysis(data_path, output_path, note=""):
             img = mh.imread(input_data)
         except Exception as e:
             print(e)
-            print("Something wrong with input data or input path")
+            logger.error("Something wrong with input data or input path")
             continue
 
         # Zde volám nějakou funkci co chce obrázek a outputpath nic jinýho zbytek volá ona
         img_processing_3(img, output_path)
 
-    print("Analysis just finished")
+    logger.info("Analysis just finished")
 
 
 def img_processing_2(img, output_path):
@@ -339,61 +348,61 @@ def img_processing_2(img, output_path):
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Histogramy
-    vw.histogram_2D_data_range(
-        r1, "Red channel", "Value", "Frequency", "01_Red_pil", output_path, 0, 255, 1, txt_file=True
-    )
-    vw.histogram_2D_data_range(
-        g1,
-        "Green channel",
-        "Value",
-        "Frequency",
-        "02_Green_pil",
-        output_path,
-        0,
-        255,
-        1,
-        txt_file=True,
-    )
-    vw.histogram_2D_data_range(
-        b1,
-        "Blue channel",
-        "Value",
-        "Frequency",
-        "03_Blue_pil",
-        output_path,
-        0,
-        255,
-        1,
-        txt_file=True,
-    )
+    # vw.histogram_2D_data_range(
+    #     r1, "Red channel", "Value", "Frequency", "01_Red_pil", output_path, 0, 255, 1, txt_file=True
+    # )
+    # vw.histogram_2D_data_range(
+    #     g1,
+    #     "Green channel",
+    #     "Value",
+    #     "Frequency",
+    #     "02_Green_pil",
+    #     output_path,
+    #     0,
+    #     255,
+    #     1,
+    #     txt_file=True,
+    # )
+    # vw.histogram_2D_data_range(
+    #     b1,
+    #     "Blue channel",
+    #     "Value",
+    #     "Frequency",
+    #     "03_Blue_pil",
+    #     output_path,
+    #     0,
+    #     255,
+    #     1,
+    #     txt_file=True,
+    # )
 
-    vw.histogram_2D_data_range(
-        r2, "Red channel", "Value", "Frequency", "04_Red_cca", output_path, 0, 255, 1, txt_file=True
-    )
-    vw.histogram_2D_data_range(
-        g2,
-        "Green channel",
-        "Value",
-        "Frequency",
-        "05_Green_cca",
-        output_path,
-        0,
-        255,
-        1,
-        txt_file=True,
-    )
-    vw.histogram_2D_data_range(
-        b2,
-        "Blue channel",
-        "Value",
-        "Frequency",
-        "06_Blue_cca",
-        output_path,
-        0,
-        255,
-        1,
-        txt_file=True,
-    )
+    # vw.histogram_2D_data_range(
+    #     r2, "Red channel", "Value", "Frequency", "04_Red_cca", output_path, 0, 255, 1, txt_file=True
+    # )
+    # vw.histogram_2D_data_range(
+    #     g2,
+    #     "Green channel",
+    #     "Value",
+    #     "Frequency",
+    #     "05_Green_cca",
+    #     output_path,
+    #     0,
+    #     255,
+    #     1,
+    #     txt_file=True,
+    # )
+    # vw.histogram_2D_data_range(
+    #     b2,
+    #     "Blue channel",
+    #     "Value",
+    #     "Frequency",
+    #     "06_Blue_cca",
+    #     output_path,
+    #     0,
+    #     255,
+    #     1,
+    #     txt_file=True,
+    # )
 
 
 def img_processing_3(img, output_path):
@@ -412,7 +421,6 @@ def img_processing_3(img, output_path):
     width = img.shape[1]
     height = img.shape[0]
 
-    print(f"{output_path}IMG/00_input_img.jpg")
     plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
 
     # ------------------ Zde kód pro analýzu ------------------------
@@ -661,61 +669,61 @@ def img_processing_3(img, output_path):
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Histogramy
-    vw.histogram_2D_data_range(
-        r1, "Red channel", "Value", "Frequency", "01_Red_pil", output_path, 0, 255, 1, txt_file=True
-    )
-    vw.histogram_2D_data_range(
-        g1,
-        "Green channel",
-        "Value",
-        "Frequency",
-        "02_Green_pil",
-        output_path,
-        0,
-        255,
-        1,
-        txt_file=True,
-    )
-    vw.histogram_2D_data_range(
-        b1,
-        "Blue channel",
-        "Value",
-        "Frequency",
-        "03_Blue_pil",
-        output_path,
-        0,
-        255,
-        1,
-        txt_file=True,
-    )
+    # vw.histogram_2D_data_range(
+    #     r1, "Red channel", "Value", "Frequency", "01_Red_pil", output_path, 0, 255, 1, txt_file=True
+    # )
+    # vw.histogram_2D_data_range(
+    #     g1,
+    #     "Green channel",
+    #     "Value",
+    #     "Frequency",
+    #     "02_Green_pil",
+    #     output_path,
+    #     0,
+    #     255,
+    #     1,
+    #     txt_file=True,
+    # )
+    # vw.histogram_2D_data_range(
+    #     b1,
+    #     "Blue channel",
+    #     "Value",
+    #     "Frequency",
+    #     "03_Blue_pil",
+    #     output_path,
+    #     0,
+    #     255,
+    #     1,
+    #     txt_file=True,
+    # )
 
-    vw.histogram_2D_data_range(
-        r2, "Red channel", "Value", "Frequency", "04_Red_cca", output_path, 0, 255, 1, txt_file=True
-    )
-    vw.histogram_2D_data_range(
-        g2,
-        "Green channel",
-        "Value",
-        "Frequency",
-        "05_Green_cca",
-        output_path,
-        0,
-        255,
-        1,
-        txt_file=True,
-    )
-    vw.histogram_2D_data_range(
-        b2,
-        "Blue channel",
-        "Value",
-        "Frequency",
-        "06_Blue_cca",
-        output_path,
-        0,
-        255,
-        1,
-        txt_file=True,
-    )
+    # vw.histogram_2D_data_range(
+    #     r2, "Red channel", "Value", "Frequency", "04_Red_cca", output_path, 0, 255, 1, txt_file=True
+    # )
+    # vw.histogram_2D_data_range(
+    #     g2,
+    #     "Green channel",
+    #     "Value",
+    #     "Frequency",
+    #     "05_Green_cca",
+    #     output_path,
+    #     0,
+    #     255,
+    #     1,
+    #     txt_file=True,
+    # )
+    # vw.histogram_2D_data_range(
+    #     b2,
+    #     "Blue channel",
+    #     "Value",
+    #     "Frequency",
+    #     "06_Blue_cca",
+    #     output_path,
+    #     0,
+    #     255,
+    #     1,
+    #     txt_file=True,
+    # )
 
 
 def img_processing_2_part(img, output_path):
@@ -1069,175 +1077,143 @@ def nuclei_RGB_channels(img, output_path):
     plt.imsave(f"{output_path}IMG/19_blue_boundary_in_original_img.jpg", img_boundary_in_original)
 
 
-def representation_in_xyz(img, output_path):
-    """Metoda vygeneruje soubor *.xyz
-    R -> x
-    G -> y
-    B -> z
-    :param img:
-    :param output_path:
-    :return:
-    """
-    width = img.shape[1]
-    height = img.shape[0]
+# def rel_representation_in_xyz(img, output_path):
+#     """Metoda vygeneruje soubor *.xyz
+#     R -> x
+#     G -> y
+#     B -> z
+#     a pak uloží snímky podle podmínek pouze vodík a ostatní
+#     :param img:
+#     :param output_path:
+#     :return:
+#     """
+#     width = img.shape[1]
+#     height = img.shape[0]
 
-    plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
+#     plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
 
-    # ------------------ Zde kód pro analýzu ------------------------
+#     # ------------------ Zde kód pro analýzu ------------------------
+#     e = [
+#         "H",
+#         "He",
+#         "Li",
+#         "Be",
+#         "B",
+#         "C",
+#         "N",
+#         "O",
+#         "F",
+#         "Ne",
+#         "Na",
+#         "Mg",
+#         "Al",
+#         "Si",
+#         "P",
+#         "S",
+#         "Cl",
+#         "Ar",
+#         "K",
+#         "Ca",
+#         "Sc",
+#         "Ti",
+#         "V",
+#         "Cr",
+#         "Mn",
+#         "Fe",
+#         "Co",
+#         "Ni",
+#         "Cu",
+#         "Zn",
+#         "Ga",
+#         "Ge",
+#         "As",
+#         "Se",
+#         "Br",
+#         "Kr",
+#         "Rb",
+#         "Sr",
+#         "Y",
+#         "Zr",
+#         "Nb",
+#         "Mo",
+#         "Tc",
+#         "Ru",
+#         "Rh",
+#         "Pd",
+#         "Ag",
+#         "Cd",
+#         "In",
+#         "Sn",
+#     ]
 
-    img = img / 255
+#     cube_shape = 256
+#     cube = np.zeros((cube_shape, cube_shape, cube_shape))
+#     cube_labels = np.zeros((cube_shape, cube_shape, cube_shape))
 
-    file = open(f"{output_path}CSV_TXT/soubor.xyz", "w")
-    file.write(str(width * height) + "\n")
+#     all_pixels = width * height
 
-    for i in range(height):
-        for j in range(width):
-            x = format(img[i][j][0], ".3f")
-            y = format(img[i][j][1], ".3f")
-            z = format(img[i][j][2], ".3f")
+#     for i in range(height):
+#         for j in range(width):
+#             x = img[i][j][0]
+#             y = img[i][j][1]
+#             z = img[i][j][2]
 
-            file.write(f"\nC\t{x}\t{y}\t{z}")
+#             cube[x, y, z] += 1
 
-    file.close()
+#     bin_cube = cube > 0
+#     num = sum(sum(sum(bin_cube)))
 
+#     cube = cube / all_pixels
 
-def rel_representation_in_xyz(img, output_path):
-    """Metoda vygeneruje soubor *.xyz
-    R -> x
-    G -> y
-    B -> z
-    a pak uloží snímky podle podmínek pouze vodík a ostatní
-    :param img:
-    :param output_path:
-    :return:
-    """
-    width = img.shape[1]
-    height = img.shape[0]
+#     mn = np.min(cube[np.nonzero(cube)])
+#     mx = np.max(cube[np.nonzero(cube)])
 
-    plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
+#     d = mx - mn
 
-    # ------------------ Zde kód pro analýzu ------------------------
-    e = [
-        "H",
-        "He",
-        "Li",
-        "Be",
-        "B",
-        "C",
-        "N",
-        "O",
-        "F",
-        "Ne",
-        "Na",
-        "Mg",
-        "Al",
-        "Si",
-        "P",
-        "S",
-        "Cl",
-        "Ar",
-        "K",
-        "Ca",
-        "Sc",
-        "Ti",
-        "V",
-        "Cr",
-        "Mn",
-        "Fe",
-        "Co",
-        "Ni",
-        "Cu",
-        "Zn",
-        "Ga",
-        "Ge",
-        "As",
-        "Se",
-        "Br",
-        "Kr",
-        "Rb",
-        "Sr",
-        "Y",
-        "Zr",
-        "Nb",
-        "Mo",
-        "Tc",
-        "Ru",
-        "Rh",
-        "Pd",
-        "Ag",
-        "Cd",
-        "In",
-        "Sn",
-    ]
+#     fn = d / (len(e) - 1)
 
-    cube_shape = 256
-    cube = np.zeros((cube_shape, cube_shape, cube_shape))
-    cube_labels = np.zeros((cube_shape, cube_shape, cube_shape))
+#     file = open(f"{output_path}CSV_TXT/soubor.xyz", "w")
 
-    all_pixels = width * height
+#     file.write(str(num + 8) + "\n")
 
-    for i in range(height):
-        for j in range(width):
-            x = img[i][j][0]
-            y = img[i][j][1]
-            z = img[i][j][2]
+#     for x in range(cube_shape):
+#         for y in range(cube_shape):
+#             for z in range(cube_shape):
+#                 if cube[x, y, z] != 0:
+#                     el = int((cube[x, y, z] - mn) / fn)
+#                     file.write(f"\n{e[el]}\t{x}\t{y}\t{z}")
+#                     cube_labels[x][y][z] = int(el + 1)
 
-            cube[x, y, z] += 1
+#     file.write("\nAu\t0\t0\t0")
+#     file.write("\nAu\t0\t255\t0")
+#     file.write("\nAu\t0\t0\t255")
+#     file.write("\nAu\t0\t255\t255")
+#     file.write("\nAu\t255\t0\t0")
+#     file.write("\nAu\t255\t255\t0")
+#     file.write("\nAu\t255\t0\t255")
+#     file.write("\nAu\t255\t255\t255")
 
-    bin_cube = cube > 0
-    num = sum(sum(sum(bin_cube)))
+#     file.close()
 
-    cube = cube / all_pixels
+#     # Pouze vodík
 
-    mn = np.min(cube[np.nonzero(cube)])
-    mx = np.max(cube[np.nonzero(cube)])
+#     bin_h = np.zeros((height, width))
+#     bin_other_el = np.zeros((height, width))
 
-    d = mx - mn
+#     for i in range(height):
+#         for j in range(width):
+#             x = img[i][j][0]
+#             y = img[i][j][1]
+#             z = img[i][j][2]
 
-    fn = d / (len(e) - 1)
+#             if cube_labels[x][y][z] == 1:
+#                 bin_h[i, j] = 1
 
-    file = open(f"{output_path}CSV_TXT/soubor.xyz", "w")
+#             if cube_labels[x][y][z] > 1:
+#                 bin_other_el[i, j] = 1
 
-    file.write(str(num + 8) + "\n")
-
-    for x in range(cube_shape):
-        for y in range(cube_shape):
-            for z in range(cube_shape):
-                if cube[x, y, z] != 0:
-                    el = int((cube[x, y, z] - mn) / fn)
-                    file.write(f"\n{e[el]}\t{x}\t{y}\t{z}")
-                    cube_labels[x][y][z] = int(el + 1)
-
-    file.write("\nAu\t0\t0\t0")
-    file.write("\nAu\t0\t255\t0")
-    file.write("\nAu\t0\t0\t255")
-    file.write("\nAu\t0\t255\t255")
-    file.write("\nAu\t255\t0\t0")
-    file.write("\nAu\t255\t255\t0")
-    file.write("\nAu\t255\t0\t255")
-    file.write("\nAu\t255\t255\t255")
-
-    file.close()
-
-    # Pouze vodík
-
-    bin_h = np.zeros((height, width))
-    bin_other_el = np.zeros((height, width))
-
-    for i in range(height):
-        for j in range(width):
-            x = img[i][j][0]
-            y = img[i][j][1]
-            z = img[i][j][2]
-
-            if cube_labels[x][y][z] == 1:
-                bin_h[i, j] = 1
-
-            if cube_labels[x][y][z] > 1:
-                bin_other_el[i, j] = 1
-
-    plt.imsave(f"{output_path}IMG/01_only_h.jpg", bin_h, cmap="gray")
-    plt.imsave(f"{output_path}IMG/02_other_el.jpg", bin_other_el, cmap="gray")
+#     plt.imsave(f"{output_path}IMG/01_only_h.jpg", bin_h, cmap="gray")
+#     plt.imsave(f"{output_path}IMG/02_other_el.jpg", bin_other_el, cmap="gray")
 
 
 def color_cube_in_otsu_mask(img, output_path):
@@ -1320,7 +1296,7 @@ def nucleus(img, output_path):
         f"{output_path}IMG/06_nuclei_labeled_removed_small.jpg", img_labeled_nuclei, cmap="jet"
     )
 
-    vw.array_2d_to_txt(img_labeled_nuclei, width, height, output_path, "labeled_img")
+    # vw.array_2d_to_txt(img_labeled_nuclei, width, height, output_path, "labeled_img")
 
     img_nuclei_boundary = sd.get_boundary_4_connected(img_labeled_nuclei, width, height)
     img_nuclei_boundary_bin = cw.convert_labeled_to_bin(img_nuclei_boundary)

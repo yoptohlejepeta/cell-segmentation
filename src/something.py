@@ -85,59 +85,60 @@ def color_cube(img, name, output_path):
     ]
 
     cube_shape = 256
-    cube = np.zeros((cube_shape, cube_shape, cube_shape))
+    # cube = np.zeros((cube_shape, cube_shape, cube_shape))
     cube_labels = np.zeros((cube_shape, cube_shape, cube_shape))
 
-    all_pixels = width * height
+    # all_pixels = width * height
 
-    for i in range(height):
-        for j in range(width):
-            x = img[i][j][0]
-            y = img[i][j][1]
-            z = img[i][j][2]
+    # for i in range(height):
+    #     for j in range(width):
+    #         x = img[i][j][0]
+    #         y = img[i][j][1]
+    #         z = img[i][j][2]
 
-            cube[x, y, z] += 1
+    #         cube[x, y, z] += 1
 
-    bin_cube = cube > 0
-    num = sum(sum(sum(bin_cube)))
+    # bin_cube = cube > 0
+    # num = sum(sum(sum(bin_cube)))
 
-    cube = cube / all_pixels
+    # cube = cube / all_pixels
 
-    mn = np.min(cube[np.nonzero(cube)])
-    mx = np.max(cube[np.nonzero(cube)])
+    # mn = np.min(cube[np.nonzero(cube)])
+    # mx = np.max(cube[np.nonzero(cube)])
 
-    d = mx - mn
+    # d = mx - mn
 
-    fn = d / (len(e) - 1)
+    # fn = d / (len(e) - 1)
 
-    file = open(f"{output_path}CSV_TXT/{name}.xyz", "w")
+    # file = open(f"{output_path}CSV_TXT/{name}.xyz", "w")
 
-    file.write(str(num + 8) + "\n")
+    # file.write(str(num + 8) + "\n")
 
-    for x in range(cube_shape):
-        for y in range(cube_shape):
-            for z in range(cube_shape):
-                if cube[x, y, z] != 0:
-                    el = int((cube[x, y, z] - mn) / fn)
-                    file.write(f"\n{e[el]}\t{x}\t{y}\t{z}")
-                    cube_labels[x][y][z] = int(el + 1)
+    # for x in range(cube_shape):
+    #     for y in range(cube_shape):
+    #         for z in range(cube_shape):
+    #             if cube[x, y, z] != 0:
+    #                 el = int((cube[x, y, z] - mn) / fn)
+    #                 file.write(f"\n{e[el]}\t{x}\t{y}\t{z}")
+    #                 cube_labels[x][y][z] = int(el + 1)
 
-    file.write("\nAu\t0\t0\t0")
-    file.write("\nAu\t0\t255\t0")
-    file.write("\nAu\t0\t0\t255")
-    file.write("\nAu\t0\t255\t255")
-    file.write("\nAu\t255\t0\t0")
-    file.write("\nAu\t255\t255\t0")
-    file.write("\nAu\t255\t0\t255")
-    file.write("\nAu\t255\t255\t255")
+    # file.write("\nAu\t0\t0\t0")
+    # file.write("\nAu\t0\t255\t0")
+    # file.write("\nAu\t0\t0\t255")
+    # file.write("\nAu\t0\t255\t255")
+    # file.write("\nAu\t255\t0\t0")
+    # file.write("\nAu\t255\t255\t0")
+    # file.write("\nAu\t255\t0\t255")
+    # file.write("\nAu\t255\t255\t255")
 
-    file.close()
+    # file.close()
 
     return cube_labels
 
 
 def color_cube_2(img):
-    """Metoda vytvoří tvz. color cube
+    """Metoda vytvoří tvz. color cube.
+
     R -> X
     G -> Y
     B -> Z
