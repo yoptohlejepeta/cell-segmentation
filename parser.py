@@ -1,4 +1,5 @@
 """Script argument parser."""
+
 from argparse import ArgumentParser
 
 parser = ArgumentParser(

@@ -13,6 +13,7 @@ import src.convert_worker as cw
 import src.image_worker as iw
 import src.shape_descriptors as sd
 import src.something as s
+
 # import src.visual_worker as vw
 
 
@@ -65,7 +66,7 @@ def analysis(data_path: str, output_path: str, note: str = "") -> None:
 
     try:
         list_of_input_data = get_names_from_directory(data_path)
-    except Exception as e:
+    except Exception:
         logger.error("Something wrong with input path")
         return
 
@@ -75,7 +76,7 @@ def analysis(data_path: str, output_path: str, note: str = "") -> None:
         default_output_path = create_directories_for_results(
             output_path, N, list_of_input_data, note
         )
-    except Exception as e:
+    except Exception:
         logger.warning("Missing output path -> Creating default one")
         default_output_path = (
             f"../Results/Analysis_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}/"
