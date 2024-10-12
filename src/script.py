@@ -97,7 +97,8 @@ def analysis(data_path: str, output_path: str, note: str = "") -> None:
             continue
 
         # Zde volám nějakou funkci co chce obrázek a outputpath nic jinýho zbytek volá ona
-        img_processing_3(img, output_path)
+        # img_processing_3(img, output_path) # FIXME
+        img_processing_2(img, output_path)
 
     logger.info("Analysis just finished")
 
@@ -455,7 +456,6 @@ def img_processing_3(img, output_path):
     # Detekce obalu
 
     RGB_balanced = cca.luminance_weighted_gray_world(img)
-    # RGB_balanced = img
     plt.imsave(f"{output_path}IMG/07_luminance_weighted_gray_world.jpg", RGB_balanced)
 
     r2, g2, b2 = cw.separate_layers(RGB_balanced)

@@ -11,7 +11,7 @@ from loguru import logger
 
 from src.script import analysis
 
-logger.add("app.log")
+logger.add("app.log", format="{time} - {level} - {message}")
 
 if __name__ == "__main__":
     args = parser.parse_args()
