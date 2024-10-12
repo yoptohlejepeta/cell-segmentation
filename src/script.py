@@ -57,13 +57,12 @@ def analysis(data_path: str, output_path: str, note: str = "") -> None:
     Then proceed to process the images.
 
     Args:
+    ----
         data_path (str): Directory with images to be processed.
         output_path (str): Directory where the results will be saved.
         note (str, optional): Note to be added to the output directory name. Defaults to "".
 
     """
-    logger.info("STARTING ANALYSIS")
-
     try:
         list_of_input_data = get_names_from_directory(data_path)
     except Exception:
@@ -78,10 +77,12 @@ def analysis(data_path: str, output_path: str, note: str = "") -> None:
         )
     except Exception:
         logger.warning("Missing output path -> Creating default one")
+        os.mkdir("Results/")
         default_output_path = (
-            f"../Results/Analysis_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}/"
+            f"Results/Analysis_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}/"
         )
         os.mkdir(default_output_path)
+        os.mkdir(default_output_path + "IMG/")
 
     for i in range(N):
         # nastavení výstupní cesty pro daný obrázek
@@ -97,10 +98,8 @@ def analysis(data_path: str, output_path: str, note: str = "") -> None:
             continue
 
         # Zde volám nějakou funkci co chce obrázek a outputpath nic jinýho zbytek volá ona
-        # img_processing_3(img, output_path) # FIXME
-        img_processing_2(img, output_path)
-
-    logger.info("Analysis just finished")
+        img_processing_3(img, output_path)  # FIXME
+        # img_processing_2(img, output_path)
 
 
 def img_processing_2(img, output_path):

@@ -7,18 +7,53 @@ OUTPUT_PATH = "../Results/"
 import time
 from parser import parser
 
-from loguru import logger
+from rich.console import Console
+from rich.markup import escape
+from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from src.script import analysis
 
-logger.add("app.log", format="{time} - {level} - {message}")
+console = Console()
 
 if __name__ == "__main__":
     args = parser.parse_args()
 
-    start_time = time.monotonic()
+    console.print(
+        Panel(
+            f"[bold][yellow]Analysis started![/yellow][/bold]\n\n"
+            f"[bold]Image Directory:[/bold] {escape(args.image_dir)}\n"
+            f"[bold]Output Directory:[/bold] {escape(args.output_dir)}",
+            title="Info",
+            border_style="blue",
+            expand=False,
+        )
+    )
 
-    analysis(args.image_dir, args.output_dir)
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+        transient=True,
+    ) as progress:
+        task = progress.add_task("[cyan]Processing images...", total=None)
 
-    finish_time = time.monotonic()
-    logger.info(str(finish_time - start_time))
+        start_time = time.monotonic()
+
+        analysis(args.image_dir, args.output_dir)
+
+        finish_time = time.monotonic()
+        elapsed_time = finish_time - start_time
+
+        progress.update(task, completed=True)
+
+    console.print(
+        Panel(
+            f"Analysis completed in {elapsed_time:.2f} seconds!\n\n"
+            f"[bold]Image Directory:[/bold] {escape(args.image_dir)}\n"
+            f"[bold]Output Directory:[/bold] {escape(args.output_dir)}",
+            title="Info",
+            border_style="green",
+            expand=False,
+        )
+    )
