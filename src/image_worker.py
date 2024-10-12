@@ -60,15 +60,27 @@ def color_balancing(img, width, height):
     return img_color_balanced
 
 
-def unsharp_mask_img(img):
-    RADIUS = 10
-    PERCENT = 300
-    THRESHOLD = 3
+def unsharp_mask_img(
+    img: np.ndarray, radius: int = 10, percent: int = 300, threshold: int = 3
+) -> np.ndarray:
+    """Unsharp mask image.
 
+    Args:
+    ----
+        img (np.ndarray): Image to be processed.
+        radius (int, optional): Radius of the filter. Defaults to 10.
+        percent (int, optional): Percentage of the sharpening. Defaults to 300.
+        threshold (int, optional): Threshold of the filter. Defaults to 3.
+
+    Returns:
+    -------
+        np.ndarray: Processed image.
+
+    """
     img_pil = Image.fromarray(img, "RGB")
 
     bmp = img_pil.filter(
-        ImageFilter.UnsharpMask(radius=RADIUS, percent=PERCENT, threshold=THRESHOLD)
+        ImageFilter.UnsharpMask(radius=radius, percent=percent, threshold=threshold)
     )
 
     return np.array(bmp)

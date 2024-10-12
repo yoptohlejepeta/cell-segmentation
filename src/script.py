@@ -1,5 +1,6 @@
 import datetime
 import os
+from pathlib import Path
 
 import colorcorrect.algorithm as cca
 import cv2
@@ -27,31 +28,15 @@ def get_names_from_directory(base_path):
     return images
 
 
-def create_directories_for_results(path, N, list_of_input_data, note):
-    time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-
-    path = f"{path}Analysis_{time}_{note}/"
-    os.mkdir(path)
-
-    for i in range(N):
-        n_path = f"{path}{list_of_input_data[i]}/"
-        os.mkdir(n_path)
-
-        path_images = f"{n_path}IMG/"
-        # path_graphs = f"{n_path}GRAPHS/"
-        # path_csv = f"{n_path}CSV_TXT/"
-
-        os.mkdir(path_images)
-        # os.mkdir(path_graphs)
-        # os.mkdir(path_csv)
-
-    # path_summary = f"{path}SUMMARY/"
-    # os.mkdir(path_summary)
+def create_directories_for_results(path: str, list_of_input_data: list[str]):
+    for i in list_of_input_data:
+        n_path = f"{path}{i}/"
+        Path(n_path).mkdir(parents=True, exist_ok=True)
 
     return path
 
 
-def analysis(data_path: str, output_path: str, note: str = "") -> None:
+def analysis(data_path: str, output_path: str) -> None:
     """Check the input and output paths.
 
     Then proceed to process the images.
@@ -65,32 +50,23 @@ def analysis(data_path: str, output_path: str, note: str = "") -> None:
     """
     try:
         list_of_input_data = get_names_from_directory(data_path)
-    except Exception:
+    except Exception as e:
         logger.error("Something wrong with input path")
         return
-
-    N = len(list_of_input_data)
-
+    new_output = f"{output_path}output_images/"
     try:
-        default_output_path = create_directories_for_results(
-            output_path, N, list_of_input_data, note
-        )
-    except Exception:
+        default_output_path = create_directories_for_results(new_output, list_of_input_data)
+    except Exception as e:
         logger.warning("Missing output path -> Creating default one")
         os.mkdir("Results/")
-        default_output_path = (
-            f"Results/Analysis_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}/"
-        )
-        os.mkdir(default_output_path)
-        os.mkdir(default_output_path + "IMG/")
+        os.mkdir("Results/output_images/")
+        default_output_path = "Results/output_images/"
 
-    for i in range(N):
-        # nastavení výstupní cesty pro daný obrázek
-        output_path = default_output_path + f"{list_of_input_data[i]}/"
+    for i in list_of_input_data:
+        new_output = default_output_path + f"{i}/"
 
-        # Zkusím načíst snímek
         try:
-            input_data = data_path + list_of_input_data[i]
+            input_data = data_path + i
             img = mh.imread(input_data)
         except Exception as e:
             print(e)
@@ -98,8 +74,7 @@ def analysis(data_path: str, output_path: str, note: str = "") -> None:
             continue
 
         # Zde volám nějakou funkci co chce obrázek a outputpath nic jinýho zbytek volá ona
-        img_processing_3(img, output_path)  # FIXME
-        # img_processing_2(img, output_path)
+        img_processing_3(img, new_output)  # FIXME
 
 
 def img_processing_2(img, output_path):
@@ -118,86 +93,80 @@ def img_processing_2(img, output_path):
     width = img.shape[1]
     height = img.shape[0]
 
-    plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
+    plt.imsave(f"{output_path}00_input_img.jpg", img)
 
     # ------------------ Zde kód pro analýzu ------------------------
     # Detekce jader
 
     img_unsharp = iw.unsharp_mask_img(img)
-    plt.imsave(f"{output_path}IMG/01_unsharp_mask.jpg", img_unsharp)
+    plt.imsave(f"{output_path}01_unsharp_mask.jpg", img_unsharp)
 
     r1, g1, b1 = cw.separate_layers(img_unsharp)
-    plt.imsave(f"{output_path}IMG/02_1_red_channel_unsharp.jpg", r1, cmap="gray")
-    plt.imsave(f"{output_path}IMG/02_2_green_channel_unsharp.jpg", g1, cmap="gray")
-    plt.imsave(f"{output_path}IMG/02_3_blue_channel_unsharp.jpg", b1, cmap="gray")
+    plt.imsave(f"{output_path}02_1_red_channel_unsharp.jpg", r1, cmap="gray")
+    plt.imsave(f"{output_path}02_2_green_channel_unsharp.jpg", g1, cmap="gray")
+    plt.imsave(f"{output_path}02_3_blue_channel_unsharp.jpg", b1, cmap="gray")
 
     b_bin_otsu = cw.convert_grayscale_to_bin_otsu(b1)
-    plt.imsave(f"{output_path}IMG/03_blue_channel_otsu.jpg", b_bin_otsu, cmap="gray")
+    plt.imsave(f"{output_path}03_blue_channel_otsu.jpg", b_bin_otsu, cmap="gray")
 
     b_bin_otsu_morp = iw.close_holes_remove_noise(b_bin_otsu)
-    plt.imsave(
-        f"{output_path}IMG/04_blue_channel_otsu_noise_removed.jpg", b_bin_otsu_morp, cmap="gray"
-    )
+    plt.imsave(f"{output_path}04_blue_channel_otsu_noise_removed.jpg", b_bin_otsu_morp, cmap="gray")
 
     img_labeled_nuclei, nr_nuclei = mh.label(b_bin_otsu_morp)
-    plt.imsave(f"{output_path}IMG/05_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
+    plt.imsave(f"{output_path}05_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
 
     img_labeled_nuclei = iw.remove_small_regions(img_labeled_nuclei, min_size=100)
-    plt.imsave(
-        f"{output_path}IMG/05_nuclei_labeled_removed_small.jpg", img_labeled_nuclei, cmap="jet"
-    )
+    plt.imsave(f"{output_path}05_nuclei_labeled_removed_small.jpg", img_labeled_nuclei, cmap="jet")
 
     img_nuclei_boundary = sd.get_boundary_4_connected(img_labeled_nuclei, width, height)
     img_nuclei_boundary_bin = cw.convert_labeled_to_bin(img_nuclei_boundary)
-    plt.imsave(f"{output_path}IMG/06_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray")
+    plt.imsave(f"{output_path}06_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray")
 
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_nuclei_boundary, width, height, [255, 0, 0]
     )
-    plt.imsave(f"{output_path}IMG/07_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}07_boundary_in_original_img.jpg", img_boundary_in_original)
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Detekce obalu
 
     RGB_balanced = cca.luminance_weighted_gray_world(img)
     # RGB_balanced = img
-    plt.imsave(f"{output_path}IMG/08_luminance_weighted_gray_world.jpg", RGB_balanced)
+    plt.imsave(f"{output_path}08_luminance_weighted_gray_world.jpg", RGB_balanced)
 
     r2, g2, b2 = cw.separate_layers(RGB_balanced)
-    plt.imsave(f"{output_path}IMG/09_1_red_channel_balanced_luminance.jpg", r2, cmap="gray")
-    plt.imsave(f"{output_path}IMG/09_2_green_channel_balanced_luminance.jpg", g2, cmap="gray")
-    plt.imsave(f"{output_path}IMG/09_3_blue_channel_balanced_luminance.jpg", b2, cmap="gray")
+    plt.imsave(f"{output_path}09_1_red_channel_balanced_luminance.jpg", r2, cmap="gray")
+    plt.imsave(f"{output_path}09_2_green_channel_balanced_luminance.jpg", g2, cmap="gray")
+    plt.imsave(f"{output_path}09_3_blue_channel_balanced_luminance.jpg", b2, cmap="gray")
 
     thresholds = filters.threshold_multiotsu(g2)
     regions = np.digitize(g2, bins=thresholds)
-    plt.imsave(f"{output_path}IMG/10_multi_otsu_regions.jpg", regions)
+    plt.imsave(f"{output_path}10_multi_otsu_regions.jpg", regions)
 
     bin_cyto_nuclei = cw.convert_labeled_to_bin(regions, background=2)
-    plt.imsave(f"{output_path}IMG/11_bin_multi_otsu_cyto.jpg", bin_cyto_nuclei, cmap="gray")
+    plt.imsave(f"{output_path}11_bin_multi_otsu_cyto.jpg", bin_cyto_nuclei, cmap="gray")
 
     img_bin_morp = iw.close_holes_remove_noise(bin_cyto_nuclei)
-    plt.imsave(f"{output_path}IMG/12_mul_otsu_bin_morp.jpg", img_bin_morp, cmap="gray")
+    plt.imsave(f"{output_path}12_mul_otsu_bin_morp.jpg", img_bin_morp, cmap="gray")
 
     img_labeled_cytoplasm, nr_cytoplasm = mh.label(img_bin_morp)
-    plt.imsave(f"{output_path}IMG/13_mul_otsu_labeled.jpg", img_labeled_cytoplasm, cmap="jet")
+    plt.imsave(f"{output_path}13_mul_otsu_labeled.jpg", img_labeled_cytoplasm, cmap="jet")
 
     img_labeled_cytoplasm = iw.remove_small_regions(img_labeled_cytoplasm, min_size=100)
     plt.imsave(
-        f"{output_path}IMG/13_mul_otsu_labeled_removed_small_cyto.jpg",
+        f"{output_path}13_mul_otsu_labeled_removed_small_cyto.jpg",
         img_labeled_cytoplasm,
         cmap="jet",
     )
 
     img_cytoplasm_boundary = sd.get_boundary_4_connected(img_labeled_cytoplasm, width, height)
     img_cytoplasm_boundary_bin = cw.convert_labeled_to_bin(img_cytoplasm_boundary)
-    plt.imsave(
-        f"{output_path}IMG/14_cytoplasm_boundary.jpg", img_cytoplasm_boundary_bin, cmap="gray"
-    )
+    plt.imsave(f"{output_path}14_cytoplasm_boundary.jpg", img_cytoplasm_boundary_bin, cmap="gray")
 
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_cytoplasm_boundary, width, height, [0, 255, 0]
     )
-    plt.imsave(f"{output_path}IMG/15_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}15_boundary_in_original_img.jpg", img_boundary_in_original)
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Spojení
@@ -205,22 +174,22 @@ def img_processing_2(img, output_path):
     cytoplasm_nuclei_boundary = img_cytoplasm_boundary_bin + img_nuclei_boundary_bin
     cytoplasm_nuclei_boundary = cw.convert_labeled_to_bin(cytoplasm_nuclei_boundary)
     plt.imsave(
-        f"{output_path}IMG/16_cytoplasm_nuclei_boundary.jpg", cytoplasm_nuclei_boundary, cmap="gray"
+        f"{output_path}16_cytoplasm_nuclei_boundary.jpg", cytoplasm_nuclei_boundary, cmap="gray"
     )
 
     boundary_original_img = iw.boundary_to_original_image(
         img, cytoplasm_nuclei_boundary, width, height
     )
-    plt.imsave(f"{output_path}IMG/17_cytoplasm_nuclei_boundary.jpg", boundary_original_img)
+    plt.imsave(f"{output_path}17_cytoplasm_nuclei_boundary.jpg", boundary_original_img)
 
     img_cytoplasm_nuclei = iw.flooding_cytoplasm(
         img_labeled_cytoplasm, img_labeled_nuclei, width, height
     )
-    plt.imsave(f"{output_path}IMG/18_flooding_cytoplasm.jpg", img_cytoplasm_nuclei, cmap="jet")
+    plt.imsave(f"{output_path}18_flooding_cytoplasm.jpg", img_cytoplasm_nuclei, cmap="jet")
 
     img_cytoplasm_boundary = sd.get_boundary_4_connected(img_cytoplasm_nuclei, width, height)
     plt.imsave(
-        f"{output_path}IMG/19_flooding_cytoplasm_boundary.jpg", img_cytoplasm_boundary, cmap="jet"
+        f"{output_path}19_flooding_cytoplasm_boundary.jpg", img_cytoplasm_boundary, cmap="jet"
     )
 
     img_cytoplasm_boundary_bin = cw.convert_labeled_to_bin(img_cytoplasm_boundary)
@@ -229,7 +198,7 @@ def img_processing_2(img, output_path):
         cytoplasm_separated_nuclei_boundary
     )
     plt.imsave(
-        f"{output_path}IMG/20_cytoplasm_nuclei_boundary.jpg",
+        f"{output_path}20_cytoplasm_nuclei_boundary.jpg",
         cytoplasm_separated_nuclei_boundary,
         cmap="gray",
     )
@@ -237,36 +206,36 @@ def img_processing_2(img, output_path):
     boundary_original_img = iw.boundary_to_original_image(
         img, cytoplasm_separated_nuclei_boundary, width, height
     )
-    plt.imsave(f"{output_path}IMG/21_cytoplasm_nuclei_boundary_original.jpg", boundary_original_img)
+    plt.imsave(f"{output_path}21_cytoplasm_nuclei_boundary_original.jpg", boundary_original_img)
 
     img_only_cytoplasm = iw.get_cytoplasm_only(b_bin_otsu_morp, img_cytoplasm_nuclei)
     img_only_cytoplasm_bin = cw.convert_labeled_to_bin(img_only_cytoplasm)
-    plt.imsave(f"{output_path}IMG/22_only_cytoplasm_bin.jpg", img_only_cytoplasm_bin, cmap="gray")
+    plt.imsave(f"{output_path}22_only_cytoplasm_bin.jpg", img_only_cytoplasm_bin, cmap="gray")
 
     img_only_cytoplasm_threshold, img_b_in_cytoplasm_mask = iw.threshold_in_mask(
         b2, img_only_cytoplasm_bin, width, height
     )
     plt.imsave(
-        f"{output_path}IMG/23_only_cytoplasm_in_blue_channel.jpg",
+        f"{output_path}23_only_cytoplasm_in_blue_channel.jpg",
         img_b_in_cytoplasm_mask,
         cmap="gray",
     )
     plt.imsave(
-        f"{output_path}IMG/24_only_cytoplasm_threshold_in_mask.jpg",
+        f"{output_path}24_only_cytoplasm_threshold_in_mask.jpg",
         img_only_cytoplasm_threshold,
         cmap="gray",
     )
 
     img_cytoplasm_and_nuclei_bin = img_only_cytoplasm_threshold + b_bin_otsu_morp
     plt.imsave(
-        f"{output_path}IMG/25_cytoplasm_and_nuclei_bin.jpg",
+        f"{output_path}25_cytoplasm_and_nuclei_bin.jpg",
         img_cytoplasm_and_nuclei_bin,
         cmap="gray",
     )
 
     img_cytoplasm_and_nuclei_labeled = img_cytoplasm_and_nuclei_bin * img_cytoplasm_nuclei
     plt.imsave(
-        f"{output_path}IMG/26_cytoplasm_and_nuclei_labeled.jpg",
+        f"{output_path}26_cytoplasm_and_nuclei_labeled.jpg",
         img_cytoplasm_and_nuclei_labeled,
         cmap="jet",
     )
@@ -282,7 +251,7 @@ def img_processing_2(img, output_path):
     img_repaired = iw.cell_repair(
         coordinates_cytoplasm, cytoplasm_sizes, number_of_cells, width, height
     )
-    plt.imsave(f"{output_path}IMG/27_cytoplasm_and_nuclei_repaired.jpg", img_repaired, cmap="jet")
+    plt.imsave(f"{output_path}27_cytoplasm_and_nuclei_repaired.jpg", img_repaired, cmap="jet")
 
     img_cytoplasm_boundary = sd.get_boundary_4_connected(img_repaired, width, height)
     img_cytoplasm_boundary_bin = cw.convert_labeled_to_bin(img_cytoplasm_boundary)
@@ -293,11 +262,11 @@ def img_processing_2(img, output_path):
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_cytoplasm_nuclei_boundary, width, height
     )
-    plt.imsave(f"{output_path}IMG/28_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}28_boundary_in_original_img.jpg", img_boundary_in_original)
 
     img_only_cytoplasm_with_nuclei = iw.get_cytoplasm_which_have_nuclei(img_repaired, nr_nuclei)
     plt.imsave(
-        f"{output_path}IMG/29_only_cytoplasm_with_nuclei.jpg",
+        f"{output_path}29_only_cytoplasm_with_nuclei.jpg",
         img_only_cytoplasm_with_nuclei,
         cmap="jet",
     )
@@ -306,7 +275,7 @@ def img_processing_2(img, output_path):
         cw.convert_labeled_to_bin(img_only_cytoplasm_with_nuclei), is_bin=True
     )
     plt.imsave(
-        f"{output_path}IMG/30_only_cytoplasm_with_nuclei_without_small_reg.jpg",
+        f"{output_path}30_only_cytoplasm_with_nuclei_without_small_reg.jpg",
         img_only_cytoplasm_with_nuclei_removed_small,
         cmap="jet",
     )
@@ -315,7 +284,7 @@ def img_processing_2(img, output_path):
         cw.convert_labeled_to_bin(img_only_cytoplasm_with_nuclei_removed_small) * img_repaired
     )
     plt.imsave(
-        f"{output_path}IMG/31_only_cytoplasm_with_nuclei_without_small_reg_repaired.jpg",
+        f"{output_path}31_only_cytoplasm_with_nuclei_without_small_reg_repaired.jpg",
         img_only_cytoplasm_with_nuclei_removed_small,
         cmap="jet",
     )
@@ -324,7 +293,7 @@ def img_processing_2(img, output_path):
         img_only_cytoplasm_with_nuclei_removed_small, width, height
     )
     plt.imsave(
-        f"{output_path}IMG/32_only_cytoplasm_with_nuclei_boundary.jpg",
+        f"{output_path}32_only_cytoplasm_with_nuclei_boundary.jpg",
         boundary_img_only_cytoplasm_with_nuclei_removed_small,
         cmap="jet",
     )
@@ -333,7 +302,7 @@ def img_processing_2(img, output_path):
         img_only_cytoplasm_with_nuclei_removed_small, img_labeled_nuclei, width, height
     )
     plt.imsave(
-        f"{output_path}IMG/33_only_cytoplasm_which_have_nuclei.jpg",
+        f"{output_path}33_only_cytoplasm_which_have_nuclei.jpg",
         only_cytoplasm_which_have_nuclei_but_not_included,
         cmap="jet",
     )
@@ -345,7 +314,7 @@ def img_processing_2(img, output_path):
         width,
         height,
     )
-    plt.imsave(f"{output_path}IMG/34_boundary_final.jpg", img_original_boundary_cytoplasm_nuclei)
+    plt.imsave(f"{output_path}34_boundary_final.jpg", img_original_boundary_cytoplasm_nuclei)
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Histogramy
@@ -406,7 +375,7 @@ def img_processing_2(img, output_path):
     # )
 
 
-def img_processing_3(img, output_path):
+def img_processing_3(img: np.ndarray, output_path: str) -> None:
     """Metoda bude využívat knihovnu PIL na zlepšení hledání jader.
 
     Metoda bude využívat knihovnu Colorcorret na zredukování nežádoucího osvětlení na snímku.
@@ -422,62 +391,58 @@ def img_processing_3(img, output_path):
     width = img.shape[1]
     height = img.shape[0]
 
-    plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
+    plt.imsave(f"{output_path}00_input_img.jpg", img)
 
     # ------------------ Zde kód pro analýzu ------------------------
     # Detekce jader
 
     img_unsharp = iw.unsharp_mask_img(img)
-    plt.imsave(f"{output_path}IMG/01_unsharp_mask.jpg", img_unsharp)
+    plt.imsave(f"{output_path}01_unsharp_mask.jpg", img_unsharp)
 
     r1, g1, b1 = cw.separate_layers(img_unsharp)
-    plt.imsave(f"{output_path}IMG/02_1_red_channel_unsharp.jpg", r1, cmap="gray")
-    plt.imsave(f"{output_path}IMG/02_2_green_channel_unsharp.jpg", g1, cmap="gray")
-    plt.imsave(f"{output_path}IMG/02_3_blue_channel_unsharp.jpg", b1, cmap="gray")
+    plt.imsave(f"{output_path}02_1_red_channel_unsharp.jpg", r1, cmap="gray")
+    plt.imsave(f"{output_path}02_2_green_channel_unsharp.jpg", g1, cmap="gray")
+    plt.imsave(f"{output_path}02_3_blue_channel_unsharp.jpg", b1, cmap="gray")
 
     b_bin_otsu = cw.convert_grayscale_to_bin_otsu(b1)
-    plt.imsave(f"{output_path}IMG/03_blue_channel_otsu.jpg", b_bin_otsu, cmap="gray")
+    plt.imsave(f"{output_path}03_blue_channel_otsu.jpg", b_bin_otsu, cmap="gray")
 
     b_bin_otsu_morp = iw.close_holes_remove_noise(b_bin_otsu)
-    plt.imsave(
-        f"{output_path}IMG/04_blue_channel_otsu_noise_removed.jpg", b_bin_otsu_morp, cmap="gray"
-    )
+    plt.imsave(f"{output_path}04_blue_channel_otsu_noise_removed.jpg", b_bin_otsu_morp, cmap="gray")
 
     img_labeled_nuclei, nr_nuclei = mh.label(b_bin_otsu_morp)
-    plt.imsave(f"{output_path}IMG/05_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
+    plt.imsave(f"{output_path}05_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
 
     img_labeled_nuclei = iw.remove_small_regions(img_labeled_nuclei, min_size=100)
-    plt.imsave(
-        f"{output_path}IMG/06_nuclei_labeled_removed_small.jpg", img_labeled_nuclei, cmap="jet"
-    )
+    plt.imsave(f"{output_path}06_nuclei_labeled_removed_small.jpg", img_labeled_nuclei, cmap="jet")
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Detekce obalu
 
     RGB_balanced = cca.luminance_weighted_gray_world(img)
-    plt.imsave(f"{output_path}IMG/07_luminance_weighted_gray_world.jpg", RGB_balanced)
+    plt.imsave(f"{output_path}07_luminance_weighted_gray_world.jpg", RGB_balanced)
 
     r2, g2, b2 = cw.separate_layers(RGB_balanced)
-    plt.imsave(f"{output_path}IMG/08_1_red_channel_balanced_luminance.jpg", r2, cmap="gray")
-    plt.imsave(f"{output_path}IMG/08_2_green_channel_balanced_luminance.jpg", g2, cmap="gray")
-    plt.imsave(f"{output_path}IMG/08_3_blue_channel_balanced_luminance.jpg", b2, cmap="gray")
+    plt.imsave(f"{output_path}08_1_red_channel_balanced_luminance.jpg", r2, cmap="gray")
+    plt.imsave(f"{output_path}08_2_green_channel_balanced_luminance.jpg", g2, cmap="gray")
+    plt.imsave(f"{output_path}08_3_blue_channel_balanced_luminance.jpg", b2, cmap="gray")
 
     thresholds = filters.threshold_multiotsu(g2)
     regions = np.digitize(g2, bins=thresholds)
-    plt.imsave(f"{output_path}IMG/09_multi_otsu_regions.jpg", regions)
+    plt.imsave(f"{output_path}09_multi_otsu_regions.jpg", regions)
 
     bin_cyto_nuclei = cw.convert_labeled_to_bin(regions, background=2)
-    plt.imsave(f"{output_path}IMG/10_bin_multi_otsu_cyto.jpg", bin_cyto_nuclei, cmap="gray")
+    plt.imsave(f"{output_path}10_bin_multi_otsu_cyto.jpg", bin_cyto_nuclei, cmap="gray")
 
     img_bin_morp = iw.close_holes_remove_noise(bin_cyto_nuclei)
-    plt.imsave(f"{output_path}IMG/11_mul_otsu_bin_morp.jpg", img_bin_morp, cmap="gray")
+    plt.imsave(f"{output_path}11_mul_otsu_bin_morp.jpg", img_bin_morp, cmap="gray")
 
     img_labeled_cytoplasm, nr_cytoplasm = mh.label(img_bin_morp)
-    plt.imsave(f"{output_path}IMG/12_mul_otsu_labeled.jpg", img_labeled_cytoplasm, cmap="jet")
+    plt.imsave(f"{output_path}12_mul_otsu_labeled.jpg", img_labeled_cytoplasm, cmap="jet")
 
     img_labeled_cytoplasm = iw.remove_small_regions(img_labeled_cytoplasm, min_size=100)
     plt.imsave(
-        f"{output_path}IMG/13_mul_otsu_labeled_removed_small_cyto.jpg",
+        f"{output_path}13_mul_otsu_labeled_removed_small_cyto.jpg",
         img_labeled_cytoplasm,
         cmap="jet",
     )
@@ -488,58 +453,54 @@ def img_processing_3(img, output_path):
     img_cytoplasm_nuclei = iw.flooding_cytoplasm(
         img_labeled_cytoplasm, img_labeled_nuclei, width, height
     )
-    plt.imsave(f"{output_path}IMG/14_flooding_cytoplasm.jpg", img_cytoplasm_nuclei, cmap="jet")
+    plt.imsave(f"{output_path}14_flooding_cytoplasm.jpg", img_cytoplasm_nuclei, cmap="jet")
 
     img_cytoplasm_nuclei = mh.labeled.remove_bordering(img_cytoplasm_nuclei)
     plt.imsave(
-        f"{output_path}IMG/15_flooding_cytoplasm_no_bordering.jpg", img_cytoplasm_nuclei, cmap="jet"
+        f"{output_path}15_flooding_cytoplasm_no_bordering.jpg", img_cytoplasm_nuclei, cmap="jet"
     )
 
     img_labeled_nuclei = cw.convert_labeled_to_bin(img_labeled_nuclei) * img_cytoplasm_nuclei
-    plt.imsave(f"{output_path}IMG/16_nuclei_no_bordering.jpg", img_labeled_nuclei, cmap="jet")
+    plt.imsave(f"{output_path}16_nuclei_no_bordering.jpg", img_labeled_nuclei, cmap="jet")
 
     img_nuclei_boundary = sd.get_boundary_4_connected(img_labeled_nuclei, width, height)
     img_nuclei_boundary_bin = cw.convert_labeled_to_bin(img_nuclei_boundary)
-    plt.imsave(f"{output_path}IMG/17_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray")
+    plt.imsave(f"{output_path}17_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray")
 
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_nuclei_boundary, width, height, [255, 0, 0]
     )
-    plt.imsave(f"{output_path}IMG/18_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}18_boundary_in_original_img.jpg", img_boundary_in_original)
 
     img_cytoplasm_boundary = sd.get_boundary_4_connected(img_labeled_cytoplasm, width, height)
     img_cytoplasm_boundary_bin = cw.convert_labeled_to_bin(img_cytoplasm_boundary)
-    plt.imsave(
-        f"{output_path}IMG/19_cytoplasm_boundary.jpg", img_cytoplasm_boundary_bin, cmap="gray"
-    )
+    plt.imsave(f"{output_path}19_cytoplasm_boundary.jpg", img_cytoplasm_boundary_bin, cmap="gray")
 
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_cytoplasm_boundary, width, height, [0, 255, 0]
     )
-    plt.imsave(f"{output_path}IMG/20_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}20_boundary_in_original_img.jpg", img_boundary_in_original)
 
     cytoplasm_nuclei_boundary = img_cytoplasm_boundary_bin + img_nuclei_boundary_bin
     cytoplasm_nuclei_boundary = cw.convert_labeled_to_bin(cytoplasm_nuclei_boundary)
     plt.imsave(
-        f"{output_path}IMG/21_cytoplasm_nuclei_boundary.jpg", cytoplasm_nuclei_boundary, cmap="gray"
+        f"{output_path}21_cytoplasm_nuclei_boundary.jpg", cytoplasm_nuclei_boundary, cmap="gray"
     )
 
     boundary_original_img = iw.boundary_to_original_image(
         img, cytoplasm_nuclei_boundary, width, height
     )
-    plt.imsave(f"{output_path}IMG/22_cytoplasm_nuclei_boundary.jpg", boundary_original_img)
+    plt.imsave(f"{output_path}22_cytoplasm_nuclei_boundary.jpg", boundary_original_img)
 
     img_cytoplasm_boundary = sd.get_boundary_4_connected(img_cytoplasm_nuclei, width, height)
     plt.imsave(
-        f"{output_path}IMG/23_flooding_cytoplasm_boundary.jpg", img_cytoplasm_boundary, cmap="jet"
+        f"{output_path}23_flooding_cytoplasm_boundary.jpg", img_cytoplasm_boundary, cmap="jet"
     )
 
     img_original_boundary_cytoplasm_nuclei = iw.two_boundary_types_to_original_image(
         img, img_nuclei_boundary, img_cytoplasm_boundary, width, height
     )
-    plt.imsave(
-        f"{output_path}IMG/23_boundary_final_skoro.jpg", img_original_boundary_cytoplasm_nuclei
-    )
+    plt.imsave(f"{output_path}23_boundary_final_skoro.jpg", img_original_boundary_cytoplasm_nuclei)
 
     img_cytoplasm_boundary_bin = cw.convert_labeled_to_bin(img_cytoplasm_boundary)
     cytoplasm_separated_nuclei_boundary = img_cytoplasm_boundary_bin + img_nuclei_boundary_bin
@@ -547,7 +508,7 @@ def img_processing_3(img, output_path):
         cytoplasm_separated_nuclei_boundary
     )
     plt.imsave(
-        f"{output_path}IMG/24_cytoplasm_nuclei_boundary.jpg",
+        f"{output_path}24_cytoplasm_nuclei_boundary.jpg",
         cytoplasm_separated_nuclei_boundary,
         cmap="gray",
     )
@@ -555,38 +516,38 @@ def img_processing_3(img, output_path):
     boundary_original_img = iw.boundary_to_original_image(
         img, cytoplasm_separated_nuclei_boundary, width, height
     )
-    plt.imsave(f"{output_path}IMG/25_cytoplasm_nuclei_boundary_original.jpg", boundary_original_img)
+    plt.imsave(f"{output_path}25_cytoplasm_nuclei_boundary_original.jpg", boundary_original_img)
 
     b_bin_otsu_morp = cw.convert_labeled_to_bin(img_labeled_nuclei)
 
     img_only_cytoplasm = iw.get_cytoplasm_only(b_bin_otsu_morp, img_cytoplasm_nuclei)
     img_only_cytoplasm_bin = cw.convert_labeled_to_bin(img_only_cytoplasm)
-    plt.imsave(f"{output_path}IMG/26_only_cytoplasm_bin.jpg", img_only_cytoplasm_bin, cmap="gray")
+    plt.imsave(f"{output_path}26_only_cytoplasm_bin.jpg", img_only_cytoplasm_bin, cmap="gray")
 
     img_only_cytoplasm_threshold, img_b_in_cytoplasm_mask = iw.threshold_in_mask(
         b2, img_only_cytoplasm_bin, width, height
     )
     plt.imsave(
-        f"{output_path}IMG/27_only_cytoplasm_in_blue_channel.jpg",
+        f"{output_path}27_only_cytoplasm_in_blue_channel.jpg",
         img_b_in_cytoplasm_mask,
         cmap="gray",
     )
     plt.imsave(
-        f"{output_path}IMG/28_only_cytoplasm_threshold_in_mask.jpg",
+        f"{output_path}28_only_cytoplasm_threshold_in_mask.jpg",
         img_only_cytoplasm_threshold,
         cmap="gray",
     )
 
     img_cytoplasm_and_nuclei_bin = img_only_cytoplasm_threshold + b_bin_otsu_morp
     plt.imsave(
-        f"{output_path}IMG/29_cytoplasm_and_nuclei_bin.jpg",
+        f"{output_path}29_cytoplasm_and_nuclei_bin.jpg",
         img_cytoplasm_and_nuclei_bin,
         cmap="gray",
     )
 
     img_cytoplasm_and_nuclei_labeled = img_cytoplasm_and_nuclei_bin * img_cytoplasm_nuclei
     plt.imsave(
-        f"{output_path}IMG/30_cytoplasm_and_nuclei_labeled.jpg",
+        f"{output_path}30_cytoplasm_and_nuclei_labeled.jpg",
         img_cytoplasm_and_nuclei_labeled,
         cmap="jet",
     )
@@ -602,7 +563,7 @@ def img_processing_3(img, output_path):
     img_repaired = iw.cell_repair(
         coordinates_cytoplasm, cytoplasm_sizes, number_of_cells, width, height
     )
-    plt.imsave(f"{output_path}IMG/21_cytoplasm_and_nuclei_repaired.jpg", img_repaired, cmap="jet")
+    plt.imsave(f"{output_path}21_cytoplasm_and_nuclei_repaired.jpg", img_repaired, cmap="jet")
 
     img_cytoplasm_boundary = sd.get_boundary_4_connected(img_repaired, width, height)
     img_cytoplasm_boundary_bin = cw.convert_labeled_to_bin(img_cytoplasm_boundary)
@@ -613,11 +574,11 @@ def img_processing_3(img, output_path):
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_cytoplasm_nuclei_boundary, width, height
     )
-    plt.imsave(f"{output_path}IMG/32_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}32_boundary_in_original_img.jpg", img_boundary_in_original)
 
     img_only_cytoplasm_with_nuclei = iw.get_cytoplasm_which_have_nuclei(img_repaired, nr_nuclei)
     plt.imsave(
-        f"{output_path}IMG/33_only_cytoplasm_with_nuclei.jpg",
+        f"{output_path}33_only_cytoplasm_with_nuclei.jpg",
         img_only_cytoplasm_with_nuclei,
         cmap="jet",
     )
@@ -626,7 +587,7 @@ def img_processing_3(img, output_path):
         cw.convert_labeled_to_bin(img_only_cytoplasm_with_nuclei), is_bin=True
     )
     plt.imsave(
-        f"{output_path}IMG/34_only_cytoplasm_with_nuclei_without_small_reg.jpg",
+        f"{output_path}34_only_cytoplasm_with_nuclei_without_small_reg.jpg",
         img_only_cytoplasm_with_nuclei_removed_small,
         cmap="jet",
     )
@@ -635,7 +596,7 @@ def img_processing_3(img, output_path):
         cw.convert_labeled_to_bin(img_only_cytoplasm_with_nuclei_removed_small) * img_repaired
     )
     plt.imsave(
-        f"{output_path}IMG/35_only_cytoplasm_with_nuclei_without_small_reg_repaired.jpg",
+        f"{output_path}35_only_cytoplasm_with_nuclei_without_small_reg_repaired.jpg",
         img_only_cytoplasm_with_nuclei_removed_small,
         cmap="jet",
     )
@@ -644,7 +605,7 @@ def img_processing_3(img, output_path):
         img_only_cytoplasm_with_nuclei_removed_small, width, height
     )
     plt.imsave(
-        f"{output_path}IMG/36_only_cytoplasm_with_nuclei_boundary.jpg",
+        f"{output_path}36_only_cytoplasm_with_nuclei_boundary.jpg",
         boundary_img_only_cytoplasm_with_nuclei_removed_small,
         cmap="jet",
     )
@@ -653,7 +614,7 @@ def img_processing_3(img, output_path):
         img_only_cytoplasm_with_nuclei_removed_small, img_labeled_nuclei, width, height
     )
     plt.imsave(
-        f"{output_path}IMG/37_only_cytoplasm_which_have_nuclei.jpg",
+        f"{output_path}37_only_cytoplasm_which_have_nuclei.jpg",
         only_cytoplasm_which_have_nuclei_but_not_included,
         cmap="jet",
     )
@@ -665,7 +626,7 @@ def img_processing_3(img, output_path):
         width,
         height,
     )
-    plt.imsave(f"{output_path}IMG/38_boundary_final.jpg", img_original_boundary_cytoplasm_nuclei)
+    plt.imsave(f"{output_path}38_boundary_final.jpg", img_original_boundary_cytoplasm_nuclei)
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Histogramy
@@ -740,70 +701,66 @@ def img_processing_2_part(img, output_path):
     width = img.shape[1]
     height = img.shape[0]
 
-    plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
+    plt.imsave(f"{output_path}00_input_img.jpg", img)
 
     # ------------------ Zde kód pro analýzu ------------------------
     # Detekce jader
 
     img_unsharp = iw.unsharp_mask_img(img)
-    plt.imsave(f"{output_path}IMG/01_unsharp_mask.jpg", img_unsharp)
+    plt.imsave(f"{output_path}01_unsharp_mask.jpg", img_unsharp)
 
     r1, g1, b1 = cw.separate_layers(img)
-    plt.imsave(f"{output_path}IMG/02_1_red_channel_unsharp.jpg", r1, cmap="gray")
-    plt.imsave(f"{output_path}IMG/02_2_green_channel_unsharp.jpg", g1, cmap="gray")
-    plt.imsave(f"{output_path}IMG/02_3_blue_channel_unsharp.jpg", b1, cmap="gray")
+    plt.imsave(f"{output_path}02_1_red_channel_unsharp.jpg", r1, cmap="gray")
+    plt.imsave(f"{output_path}02_2_green_channel_unsharp.jpg", g1, cmap="gray")
+    plt.imsave(f"{output_path}02_3_blue_channel_unsharp.jpg", b1, cmap="gray")
 
     b_bin_otsu = cw.convert_grayscale_to_bin_otsu(b1)
-    plt.imsave(f"{output_path}IMG/03_blue_channel_otsu.jpg", b_bin_otsu, cmap="gray")
+    plt.imsave(f"{output_path}03_blue_channel_otsu.jpg", b_bin_otsu, cmap="gray")
 
     b_bin_otsu_morp = iw.close_holes_remove_noise(b_bin_otsu)
-    plt.imsave(
-        f"{output_path}IMG/04_blue_channel_otsu_noise_removed.jpg", b_bin_otsu_morp, cmap="gray"
-    )
+    plt.imsave(f"{output_path}04_blue_channel_otsu_noise_removed.jpg", b_bin_otsu_morp, cmap="gray")
 
     img_labeled_nuclei, nr_nuclei = mh.label(b_bin_otsu_morp)
-    plt.imsave(f"{output_path}IMG/05_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
+    plt.imsave(f"{output_path}05_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
 
     img_nuclei_boundary = sd.get_boundary_4_connected(img_labeled_nuclei, width, height)
     img_nuclei_boundary_bin = cw.convert_labeled_to_bin(img_nuclei_boundary)
-    plt.imsave(f"{output_path}IMG/06_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray")
+    plt.imsave(f"{output_path}06_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray")
 
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_nuclei_boundary, width, height, [255, 0, 0]
     )
-    plt.imsave(f"{output_path}IMG/07_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}07_boundary_in_original_img.jpg", img_boundary_in_original)
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Detekce obalu
 
     r2, g2, b2 = cw.separate_layers(img)
-    plt.imsave(f"{output_path}IMG/09_1_red_channel_balanced_luminance.jpg", r2, cmap="gray")
-    plt.imsave(f"{output_path}IMG/09_2_green_channel_balanced_luminance.jpg", g2, cmap="gray")
-    plt.imsave(f"{output_path}IMG/09_3_blue_channel_balanced_luminance.jpg", b2, cmap="gray")
+    plt.imsave(f"{output_path}09_1_red_channel_balanced_luminance.jpg", r2, cmap="gray")
+    plt.imsave(f"{output_path}09_2_green_channel_balanced_luminance.jpg", g2, cmap="gray")
+    plt.imsave(f"{output_path}09_3_blue_channel_balanced_luminance.jpg", b2, cmap="gray")
 
     thresholds = filters.threshold_multiotsu(g2)
     regions = np.digitize(g2, bins=thresholds)
-    plt.imsave(f"{output_path}IMG/10_multi_otsu_regions.jpg", regions)
+    plt.imsave(f"{output_path}10_multi_otsu_regions.jpg", regions)
 
     bin_cyto_nuclei = cw.convert_labeled_to_bin(regions, background=2)
-    plt.imsave(f"{output_path}IMG/11_bin_multi_otsu_cyto.jpg", bin_cyto_nuclei, cmap="gray")
+    plt.imsave(f"{output_path}11_bin_multi_otsu_cyto.jpg", bin_cyto_nuclei, cmap="gray")
 
     img_bin_morp = iw.close_holes_remove_noise(bin_cyto_nuclei)
-    plt.imsave(f"{output_path}IMG/12_mul_otsu_bin_morp.jpg", img_bin_morp, cmap="gray")
+    plt.imsave(f"{output_path}12_mul_otsu_bin_morp.jpg", img_bin_morp, cmap="gray")
 
     img_labeled_cytoplasm, nr_cytoplasm = mh.label(img_bin_morp)
-    plt.imsave(f"{output_path}IMG/13_mul_otsu_labeled.jpg", img_labeled_cytoplasm, cmap="jet")
+    plt.imsave(f"{output_path}13_mul_otsu_labeled.jpg", img_labeled_cytoplasm, cmap="jet")
 
     img_cytoplasm_boundary = sd.get_boundary_4_connected(img_labeled_cytoplasm, width, height)
     img_cytoplasm_boundary_bin = cw.convert_labeled_to_bin(img_cytoplasm_boundary)
-    plt.imsave(
-        f"{output_path}IMG/14_cytoplasm_boundary.jpg", img_cytoplasm_boundary_bin, cmap="gray"
-    )
+    plt.imsave(f"{output_path}14_cytoplasm_boundary.jpg", img_cytoplasm_boundary_bin, cmap="gray")
 
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_cytoplasm_boundary, width, height, [0, 255, 0]
     )
-    plt.imsave(f"{output_path}IMG/15_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}15_boundary_in_original_img.jpg", img_boundary_in_original)
 
     # ---------------------------------------------------------------------------------------------------------------- #
 
@@ -823,45 +780,45 @@ def color_balancing(img, output_path):
     height = img.shape[0]
 
     # Original image
-    plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
+    plt.imsave(f"{output_path}00_input_img.jpg", img)
 
     # CV2
     wb = cv2.xphoto.createGrayworldWB()
     createGrayworldWB = wb.balanceWhite(img)
-    plt.imsave(f"{output_path}IMG/01_cv2_createGrayworldWB.jpg", createGrayworldWB)
+    plt.imsave(f"{output_path}01_cv2_createGrayworldWB.jpg", createGrayworldWB)
 
     wb = cv2.xphoto.createSimpleWB()
     createSimpleWB = wb.balanceWhite(img)
-    plt.imsave(f"{output_path}IMG/02_cv2_createSimpleWB.jpg", createSimpleWB)
+    plt.imsave(f"{output_path}02_cv2_createSimpleWB.jpg", createSimpleWB)
 
     # Article
     article_balance = iw.color_balancing(img, width, height).astype(np.uint8)
-    plt.imsave(f"{output_path}IMG/03_article_balance.jpg", article_balance)
+    plt.imsave(f"{output_path}03_article_balance.jpg", article_balance)
 
     # PIL
     unsharp_mask = iw.unsharp_mask_img(img)
-    plt.imsave(f"{output_path}IMG/04_PIL_unsharp_mask.jpg", unsharp_mask)
+    plt.imsave(f"{output_path}04_PIL_unsharp_mask.jpg", unsharp_mask)
 
     # CCA
     max_white = cca.max_white(img)
-    plt.imsave(f"{output_path}IMG/05_cca_max_white.jpg", max_white)
+    plt.imsave(f"{output_path}05_cca_max_white.jpg", max_white)
 
     retinex = cca.retinex(img)
-    plt.imsave(f"{output_path}IMG/06_cca_retinex.jpg", retinex)
+    plt.imsave(f"{output_path}06_cca_retinex.jpg", retinex)
 
     automatic_color_equalization = cca.automatic_color_equalization(img)
     plt.imsave(
-        f"{output_path}IMG/07_cca_automatic_color_equalization.jpg", automatic_color_equalization
+        f"{output_path}07_cca_automatic_color_equalization.jpg", automatic_color_equalization
     )
 
     luminance_weighted_gray_world = cca.luminance_weighted_gray_world(img)
     plt.imsave(
-        f"{output_path}IMG/08_cca_luminance_weighted_gray_world.jpg", luminance_weighted_gray_world
+        f"{output_path}08_cca_luminance_weighted_gray_world.jpg", luminance_weighted_gray_world
     )
 
     standard_deviation_weighted_grey_world = cca.standard_deviation_weighted_grey_world(img)
     plt.imsave(
-        f"{output_path}IMG/09_cca_standard_deviation_weighted_grey_world.jpg",
+        f"{output_path}09_cca_standard_deviation_weighted_grey_world.jpg",
         standard_deviation_weighted_grey_world,
     )
 
@@ -869,7 +826,7 @@ def color_balancing(img, output_path):
         cca.standard_deviation_and_luminance_weighted_gray_world(img)
     )
     plt.imsave(
-        f"{output_path}IMG/10_cca_standard_deviation_and_luminance_weighted_gray_world.jpg",
+        f"{output_path}10_cca_standard_deviation_and_luminance_weighted_gray_world.jpg",
         standard_deviation_and_luminance_weighted_gray_world,
     )
 
@@ -886,7 +843,7 @@ def cytoplasm_RGB_channels(img, output_path):
     width = img.shape[1]
     height = img.shape[0]
 
-    plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
+    plt.imsave(f"{output_path}00_input_img.jpg", img)
 
     # ------------------ Zde kód pro analýzu ------------------------
     # Detekce obalu
@@ -894,85 +851,85 @@ def cytoplasm_RGB_channels(img, output_path):
     r2, g2, b2 = cw.separate_layers(img)
 
     # ---------------- red ----------------
-    plt.imsave(f"{output_path}IMG/02_red_0_channel_.jpg", r2, cmap="gray")
+    plt.imsave(f"{output_path}02_red_0_channel_.jpg", r2, cmap="gray")
 
     thresholds = filters.threshold_multiotsu(r2)
     regions = np.digitize(r2, bins=thresholds)
-    plt.imsave(f"{output_path}IMG/02_red_multi_otsu_regions.jpg", regions)
+    plt.imsave(f"{output_path}02_red_multi_otsu_regions.jpg", regions)
 
     bin_cyto_nuclei = cw.convert_labeled_to_bin(regions, background=2)
-    plt.imsave(f"{output_path}IMG/03_red_bin_multi_otsu_cyto.jpg", bin_cyto_nuclei, cmap="gray")
+    plt.imsave(f"{output_path}03_red_bin_multi_otsu_cyto.jpg", bin_cyto_nuclei, cmap="gray")
 
     img_bin_morp = iw.close_holes_remove_noise(bin_cyto_nuclei)
-    plt.imsave(f"{output_path}IMG/04_red_mul_otsu_bin_morp.jpg", img_bin_morp, cmap="gray")
+    plt.imsave(f"{output_path}04_red_mul_otsu_bin_morp.jpg", img_bin_morp, cmap="gray")
 
     img_labeled_cytoplasm, nr_cytoplasm = mh.label(img_bin_morp)
-    plt.imsave(f"{output_path}IMG/05_red_mul_otsu_labeled.jpg", img_labeled_cytoplasm, cmap="jet")
+    plt.imsave(f"{output_path}05_red_mul_otsu_labeled.jpg", img_labeled_cytoplasm, cmap="jet")
 
     img_cytoplasm_boundary = sd.get_boundary_4_connected(img_labeled_cytoplasm, width, height)
     img_cytoplasm_boundary_bin = cw.convert_labeled_to_bin(img_cytoplasm_boundary)
     plt.imsave(
-        f"{output_path}IMG/06_red_cytoplasm_boundary.jpg", img_cytoplasm_boundary_bin, cmap="gray"
+        f"{output_path}06_red_cytoplasm_boundary.jpg", img_cytoplasm_boundary_bin, cmap="gray"
     )
 
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_cytoplasm_boundary, width, height, [0, 255, 0]
     )
-    plt.imsave(f"{output_path}IMG/07_red_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}07_red_boundary_in_original_img.jpg", img_boundary_in_original)
 
     # ---------------- green ----------------
-    plt.imsave(f"{output_path}IMG/08_green_0_channel_.jpg", g2, cmap="gray")
+    plt.imsave(f"{output_path}08_green_0_channel_.jpg", g2, cmap="gray")
 
     thresholds = filters.threshold_multiotsu(g2)
     regions = np.digitize(g2, bins=thresholds)
-    plt.imsave(f"{output_path}IMG/08_green_multi_otsu_regions.jpg", regions)
+    plt.imsave(f"{output_path}08_green_multi_otsu_regions.jpg", regions)
 
     bin_cyto_nuclei = cw.convert_labeled_to_bin(regions, background=2)
-    plt.imsave(f"{output_path}IMG/09_green_bin_multi_otsu_cyto.jpg", bin_cyto_nuclei, cmap="gray")
+    plt.imsave(f"{output_path}09_green_bin_multi_otsu_cyto.jpg", bin_cyto_nuclei, cmap="gray")
 
     img_bin_morp = iw.close_holes_remove_noise(bin_cyto_nuclei)
-    plt.imsave(f"{output_path}IMG/10_green_mul_otsu_bin_morp.jpg", img_bin_morp, cmap="gray")
+    plt.imsave(f"{output_path}10_green_mul_otsu_bin_morp.jpg", img_bin_morp, cmap="gray")
 
     img_labeled_cytoplasm, nr_cytoplasm = mh.label(img_bin_morp)
-    plt.imsave(f"{output_path}IMG/11_green_mul_otsu_labeled.jpg", img_labeled_cytoplasm, cmap="jet")
+    plt.imsave(f"{output_path}11_green_mul_otsu_labeled.jpg", img_labeled_cytoplasm, cmap="jet")
 
     img_cytoplasm_boundary = sd.get_boundary_4_connected(img_labeled_cytoplasm, width, height)
     img_cytoplasm_boundary_bin = cw.convert_labeled_to_bin(img_cytoplasm_boundary)
     plt.imsave(
-        f"{output_path}IMG/12_green_cytoplasm_boundary.jpg", img_cytoplasm_boundary_bin, cmap="gray"
+        f"{output_path}12_green_cytoplasm_boundary.jpg", img_cytoplasm_boundary_bin, cmap="gray"
     )
 
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_cytoplasm_boundary, width, height, [0, 255, 0]
     )
-    plt.imsave(f"{output_path}IMG/13_green_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}13_green_boundary_in_original_img.jpg", img_boundary_in_original)
 
     # ---------------- blue ----------------
-    plt.imsave(f"{output_path}IMG/14_blue_0_channel_.jpg", b2, cmap="gray")
+    plt.imsave(f"{output_path}14_blue_0_channel_.jpg", b2, cmap="gray")
 
     thresholds = filters.threshold_multiotsu(b2)
     regions = np.digitize(b2, bins=thresholds)
-    plt.imsave(f"{output_path}IMG/14_blue_multi_otsu_regions.jpg", regions)
+    plt.imsave(f"{output_path}14_blue_multi_otsu_regions.jpg", regions)
 
     bin_cyto_nuclei = cw.convert_labeled_to_bin(regions, background=2)
-    plt.imsave(f"{output_path}IMG/15_blue_bin_multi_otsu_cyto.jpg", bin_cyto_nuclei, cmap="gray")
+    plt.imsave(f"{output_path}15_blue_bin_multi_otsu_cyto.jpg", bin_cyto_nuclei, cmap="gray")
 
     img_bin_morp = iw.close_holes_remove_noise(bin_cyto_nuclei)
-    plt.imsave(f"{output_path}IMG/16_blue_mul_otsu_bin_morp.jpg", img_bin_morp, cmap="gray")
+    plt.imsave(f"{output_path}16_blue_mul_otsu_bin_morp.jpg", img_bin_morp, cmap="gray")
 
     img_labeled_cytoplasm, nr_cytoplasm = mh.label(img_bin_morp)
-    plt.imsave(f"{output_path}IMG/17_blue_mul_otsu_labeled.jpg", img_labeled_cytoplasm, cmap="jet")
+    plt.imsave(f"{output_path}17_blue_mul_otsu_labeled.jpg", img_labeled_cytoplasm, cmap="jet")
 
     img_cytoplasm_boundary = sd.get_boundary_4_connected(img_labeled_cytoplasm, width, height)
     img_cytoplasm_boundary_bin = cw.convert_labeled_to_bin(img_cytoplasm_boundary)
     plt.imsave(
-        f"{output_path}IMG/18_blue_cytoplasm_boundary.jpg", img_cytoplasm_boundary_bin, cmap="gray"
+        f"{output_path}18_blue_cytoplasm_boundary.jpg", img_cytoplasm_boundary_bin, cmap="gray"
     )
 
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_cytoplasm_boundary, width, height, [0, 255, 0]
     )
-    plt.imsave(f"{output_path}IMG/19_blue_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}19_blue_boundary_in_original_img.jpg", img_boundary_in_original)
 
     # ---------------------------------------------------------------------------------------------------------------- #
 
@@ -990,91 +947,83 @@ def nuclei_RGB_channels(img, output_path):
     width = img.shape[1]
     height = img.shape[0]
 
-    plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
+    plt.imsave(f"{output_path}00_input_img.jpg", img)
 
     # ------------------ Zde kód pro analýzu ------------------------
     # Detekce jader
 
     img_unsharp = iw.unsharp_mask_img(img)
-    plt.imsave(f"{output_path}IMG/01_unsharp_mask.jpg", img_unsharp)
+    plt.imsave(f"{output_path}01_unsharp_mask.jpg", img_unsharp)
 
     r, g, b = cw.separate_layers(img_unsharp)
 
     # red --------------------------------------------------------------------------------------------------------------
 
-    plt.imsave(f"{output_path}IMG/02_red_channel_unsharp.jpg", r, cmap="gray")
+    plt.imsave(f"{output_path}02_red_channel_unsharp.jpg", r, cmap="gray")
 
     r_bin_otsu = cw.convert_grayscale_to_bin_otsu(r)
-    plt.imsave(f"{output_path}IMG/03_red_channel_otsu.jpg", r_bin_otsu, cmap="gray")
+    plt.imsave(f"{output_path}03_red_channel_otsu.jpg", r_bin_otsu, cmap="gray")
 
     r_bin_otsu_morp = iw.close_holes_remove_noise(r_bin_otsu)
-    plt.imsave(
-        f"{output_path}IMG/04_red_channel_otsu_noise_removed.jpg", r_bin_otsu_morp, cmap="gray"
-    )
+    plt.imsave(f"{output_path}04_red_channel_otsu_noise_removed.jpg", r_bin_otsu_morp, cmap="gray")
 
     img_labeled_nuclei, nr_nuclei = mh.label(r_bin_otsu_morp)
-    plt.imsave(f"{output_path}IMG/05_red_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
+    plt.imsave(f"{output_path}05_red_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
 
     img_nuclei_boundary = sd.get_boundary_4_connected(img_labeled_nuclei, width, height)
     img_nuclei_boundary_bin = cw.convert_labeled_to_bin(img_nuclei_boundary)
-    plt.imsave(f"{output_path}IMG/06_red_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray")
+    plt.imsave(f"{output_path}06_red_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray")
 
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_nuclei_boundary, width, height, [255, 0, 0]
     )
-    plt.imsave(f"{output_path}IMG/07_red_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}07_red_boundary_in_original_img.jpg", img_boundary_in_original)
 
     # green ------------------------------------------------------------------------------------------------------------
 
-    plt.imsave(f"{output_path}IMG/08_green_channel_unsharp.jpg", g, cmap="gray")
+    plt.imsave(f"{output_path}08_green_channel_unsharp.jpg", g, cmap="gray")
 
     g_bin_otsu = cw.convert_grayscale_to_bin_otsu(g)
-    plt.imsave(f"{output_path}IMG/09_green_channel_otsu.jpg", g_bin_otsu, cmap="gray")
+    plt.imsave(f"{output_path}09_green_channel_otsu.jpg", g_bin_otsu, cmap="gray")
 
     g_bin_otsu_morp = iw.close_holes_remove_noise(g_bin_otsu)
     plt.imsave(
-        f"{output_path}IMG/10_green_channel_otsu_noise_removed.jpg", g_bin_otsu_morp, cmap="gray"
+        f"{output_path}10_green_channel_otsu_noise_removed.jpg", g_bin_otsu_morp, cmap="gray"
     )
 
     img_labeled_nuclei, nr_nuclei = mh.label(g_bin_otsu_morp)
-    plt.imsave(f"{output_path}IMG/11_green_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
+    plt.imsave(f"{output_path}11_green_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
 
     img_nuclei_boundary = sd.get_boundary_4_connected(img_labeled_nuclei, width, height)
     img_nuclei_boundary_bin = cw.convert_labeled_to_bin(img_nuclei_boundary)
-    plt.imsave(
-        f"{output_path}IMG/12_green_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray"
-    )
+    plt.imsave(f"{output_path}12_green_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray")
 
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_nuclei_boundary, width, height, [255, 0, 0]
     )
-    plt.imsave(f"{output_path}IMG/13_green_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}13_green_boundary_in_original_img.jpg", img_boundary_in_original)
 
     # blue -------------------------------------------------------------------------------------------------------------
 
-    plt.imsave(f"{output_path}IMG/14_blue_channel_unsharp.jpg", b, cmap="gray")
+    plt.imsave(f"{output_path}14_blue_channel_unsharp.jpg", b, cmap="gray")
 
     b_bin_otsu = cw.convert_grayscale_to_bin_otsu(b)
-    plt.imsave(f"{output_path}IMG/15_blue_channel_otsu.jpg", b_bin_otsu, cmap="gray")
+    plt.imsave(f"{output_path}15_blue_channel_otsu.jpg", b_bin_otsu, cmap="gray")
 
     b_bin_otsu_morp = iw.close_holes_remove_noise(b_bin_otsu)
-    plt.imsave(
-        f"{output_path}IMG/16_blue_channel_otsu_noise_removed.jpg", b_bin_otsu_morp, cmap="gray"
-    )
+    plt.imsave(f"{output_path}16_blue_channel_otsu_noise_removed.jpg", b_bin_otsu_morp, cmap="gray")
 
     img_labeled_nuclei, nr_nuclei = mh.label(b_bin_otsu_morp)
-    plt.imsave(f"{output_path}IMG/17_blue_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
+    plt.imsave(f"{output_path}17_blue_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
 
     img_nuclei_boundary = sd.get_boundary_4_connected(img_labeled_nuclei, width, height)
     img_nuclei_boundary_bin = cw.convert_labeled_to_bin(img_nuclei_boundary)
-    plt.imsave(
-        f"{output_path}IMG/18_blue_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray"
-    )
+    plt.imsave(f"{output_path}18_blue_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray")
 
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_nuclei_boundary, width, height, [255, 0, 0]
     )
-    plt.imsave(f"{output_path}IMG/19_blue_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}19_blue_boundary_in_original_img.jpg", img_boundary_in_original)
 
 
 # def rel_representation_in_xyz(img, output_path):
@@ -1090,7 +1039,7 @@ def nuclei_RGB_channels(img, output_path):
 #     width = img.shape[1]
 #     height = img.shape[0]
 
-#     plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
+#     plt.imsave(f"{output_path}00_input_img.jpg", img)
 
 #     # ------------------ Zde kód pro analýzu ------------------------
 #     e = [
@@ -1212,8 +1161,8 @@ def nuclei_RGB_channels(img, output_path):
 #             if cube_labels[x][y][z] > 1:
 #                 bin_other_el[i, j] = 1
 
-#     plt.imsave(f"{output_path}IMG/01_only_h.jpg", bin_h, cmap="gray")
-#     plt.imsave(f"{output_path}IMG/02_other_el.jpg", bin_other_el, cmap="gray")
+#     plt.imsave(f"{output_path}01_only_h.jpg", bin_h, cmap="gray")
+#     plt.imsave(f"{output_path}02_other_el.jpg", bin_other_el, cmap="gray")
 
 
 def color_cube_in_otsu_mask(img, output_path):
@@ -1231,24 +1180,24 @@ def color_cube_in_otsu_mask(img, output_path):
     width = img.shape[1]
     height = img.shape[0]
 
-    plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
+    plt.imsave(f"{output_path}00_input_img.jpg", img)
 
     # ------------------ Zde kód pro analýzu ------------------------
 
     _ = s.color_cube(img, "color_cube", output_path)
 
     img_unsharp = iw.unsharp_mask_img(img)
-    plt.imsave(f"{output_path}IMG/01_unsharp_mask.jpg", img_unsharp)
+    plt.imsave(f"{output_path}01_unsharp_mask.jpg", img_unsharp)
 
     r1, g1, b1 = cw.separate_layers(img_unsharp)
 
     b_bin_otsu = cw.convert_grayscale_to_bin_otsu(b1)
-    plt.imsave(f"{output_path}IMG/02_otsu_blue_channel.jpg", b_bin_otsu, cmap="gray")
+    plt.imsave(f"{output_path}02_otsu_blue_channel.jpg", b_bin_otsu, cmap="gray")
 
     img_XYZ_mask = np.copy(img)
 
     img_XYZ_mask[:, :, 2] = img_XYZ_mask[:, :, 2] * b_bin_otsu
-    plt.imsave(f"{output_path}IMG/03_weird_img.jpg", img_XYZ_mask)
+    plt.imsave(f"{output_path}03_weird_img.jpg", img_XYZ_mask)
 
     _ = s.color_cube(img_XYZ_mask, "color_cube_mask", output_path)
 
@@ -1261,7 +1210,7 @@ def nucleus(img, output_path):
     width = img.shape[1]
     height = img.shape[0]
 
-    plt.imsave(f"{output_path}IMG/00_input_img.jpg", img)
+    plt.imsave(f"{output_path}00_input_img.jpg", img)
 
     # ------------------ Zde kód pro analýzu ------------------------
     # static variables
@@ -1270,42 +1219,38 @@ def nucleus(img, output_path):
     iterations = 3
 
     img_unsharp = iw.unsharp_mask_img(img)
-    plt.imsave(f"{output_path}IMG/01_unsharp_mask.jpg", img_unsharp)
+    plt.imsave(f"{output_path}01_unsharp_mask.jpg", img_unsharp)
 
     r1, g1, b1 = cw.separate_layers(img_unsharp)
-    plt.imsave(f"{output_path}IMG/02_1_red_channel_unsharp.jpg", r1, cmap="gray")
-    plt.imsave(f"{output_path}IMG/02_2_green_channel_unsharp.jpg", g1, cmap="gray")
-    plt.imsave(f"{output_path}IMG/02_3_blue_channel_unsharp.jpg", b1, cmap="gray")
+    plt.imsave(f"{output_path}02_1_red_channel_unsharp.jpg", r1, cmap="gray")
+    plt.imsave(f"{output_path}02_2_green_channel_unsharp.jpg", g1, cmap="gray")
+    plt.imsave(f"{output_path}02_3_blue_channel_unsharp.jpg", b1, cmap="gray")
 
     b_bin_otsu = cw.convert_grayscale_to_bin_otsu(b1)
-    plt.imsave(f"{output_path}IMG/03_blue_channel_otsu.jpg", b_bin_otsu, cmap="gray")
+    plt.imsave(f"{output_path}03_blue_channel_otsu.jpg", b_bin_otsu, cmap="gray")
 
     # TODO
     # Rozepsat ať můžu vidět i mezi kroky
     # Nebudu používat už ty funkce co mám protože nemusí být vždy ideální
     b_bin_otsu_morp = iw.close_holes_remove_noise(b_bin_otsu)
-    plt.imsave(
-        f"{output_path}IMG/04_blue_channel_otsu_noise_removed.jpg", b_bin_otsu_morp, cmap="gray"
-    )
+    plt.imsave(f"{output_path}04_blue_channel_otsu_noise_removed.jpg", b_bin_otsu_morp, cmap="gray")
 
     img_labeled_nuclei, nr_nuclei = mh.label(b_bin_otsu_morp)
-    plt.imsave(f"{output_path}IMG/05_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
+    plt.imsave(f"{output_path}05_nuclei_labeled.jpg", img_labeled_nuclei, cmap="jet")
 
     img_labeled_nuclei = iw.remove_small_regions(img_labeled_nuclei, min_size=min_size)
-    plt.imsave(
-        f"{output_path}IMG/06_nuclei_labeled_removed_small.jpg", img_labeled_nuclei, cmap="jet"
-    )
+    plt.imsave(f"{output_path}06_nuclei_labeled_removed_small.jpg", img_labeled_nuclei, cmap="jet")
 
     # vw.array_2d_to_txt(img_labeled_nuclei, width, height, output_path, "labeled_img")
 
     img_nuclei_boundary = sd.get_boundary_4_connected(img_labeled_nuclei, width, height)
     img_nuclei_boundary_bin = cw.convert_labeled_to_bin(img_nuclei_boundary)
-    plt.imsave(f"{output_path}IMG/17_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray")
+    plt.imsave(f"{output_path}17_nuclei_boundary.jpg", img_nuclei_boundary_bin, cmap="gray")
 
     img_boundary_in_original = iw.boundary_to_original_image(
         img, img_nuclei_boundary, width, height, [255, 0, 0]
     )
-    plt.imsave(f"{output_path}IMG/18_boundary_in_original_img.jpg", img_boundary_in_original)
+    plt.imsave(f"{output_path}18_boundary_in_original_img.jpg", img_boundary_in_original)
 
 
 if __name__ == "__main__":

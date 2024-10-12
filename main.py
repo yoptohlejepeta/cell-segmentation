@@ -52,7 +52,7 @@ if __name__ == "__main__":
             f"Analysis completed in {elapsed_time:.2f} seconds!\n\n"
             f"[bold]Image Directory:[/bold] {escape(args.image_dir)}\n"
             f"[bold]Output Directory:[/bold] {escape(args.output_dir)}",
-            title="Info",
+            title="Completed",
             border_style="green",
             expand=False,
         )
