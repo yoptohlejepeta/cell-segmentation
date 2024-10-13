@@ -1,4 +1,3 @@
-import datetime
 import os
 from pathlib import Path
 
@@ -53,7 +52,7 @@ def check_dirs(data_path: str, output_path: str) -> tuple[list[str], str]:
     mod_output = f"{output_path}output_images/"
     try:
         default_output_path = create_directories_for_results(mod_output, list_of_input_data)
-    except Exception as e:
+    except Exception:
         logger.warning("Missing output path -> Creating default one")
         Path("Results/").mkdir(parents=True, exist_ok=True)
         Path("Results/output_images/").mkdir(parents=True, exist_ok=True)
@@ -360,7 +359,7 @@ def img_processing_2(img, output_path):
     # )
 
 
-def img_processing_3(img: np.ndarray, output_path: str) -> None:
+def img_processing_3(img: np.ndarray, output_path: str, steps: bool) -> None:
     """Metoda bude využívat knihovnu PIL na zlepšení hledání jader.
 
     Metoda bude využívat knihovnu Colorcorret na zredukování nežádoucího osvětlení na snímku.
@@ -381,12 +380,13 @@ def img_processing_3(img: np.ndarray, output_path: str) -> None:
     # ------------------ Zde kód pro analýzu ------------------------
     # Detekce jader
 
-    img_unsharp = iw.unsharp_mask_img(img, output_path)
+    img_unsharp = iw.unsharp_mask_img(img, output_path, steps=steps)
 
     r1, g1, b1 = cw.separate_layers(img_unsharp)
-    plt.imsave(f"{output_path}02_1_red_channel_unsharp.jpg", r1, cmap="gray")
-    plt.imsave(f"{output_path}02_2_green_channel_unsharp.jpg", g1, cmap="gray")
-    plt.imsave(f"{output_path}02_3_blue_channel_unsharp.jpg", b1, cmap="gray")
+    if steps:
+        plt.imsave(f"{output_path}02_1_red_channel_unsharp.jpg", r1, cmap="gray")
+        plt.imsave(f"{output_path}02_2_green_channel_unsharp.jpg", g1, cmap="gray")
+        plt.imsave(f"{output_path}02_3_blue_channel_unsharp.jpg", b1, cmap="gray")
 
     b_bin_otsu = cw.convert_grayscale_to_bin_otsu(b1)
     plt.imsave(f"{output_path}03_blue_channel_otsu.jpg", b_bin_otsu, cmap="gray")

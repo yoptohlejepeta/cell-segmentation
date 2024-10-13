@@ -253,12 +253,21 @@ def convert_2D_to_3D(img, width, height):
     return img_3D
 
 
-def separate_layers(img):
-    L0 = img[:, :, 0]
-    L1 = img[:, :, 1]
-    L2 = img[:, :, 2]
+def separate_layers(img: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Separate layers of image.
 
-    return L0, L1, L2
+    Args:
+        img (np.ndarray): Image.
+
+    Returns:
+        np.ndarray: Red layer, green layer, blue layer.
+
+    """
+    rl = img[:, :, 0]
+    gl = img[:, :, 1]
+    bl = img[:, :, 2]
+
+    return rl, gl, bl
 
 
 def convert_img_to_norm_img(img, color_system_key):

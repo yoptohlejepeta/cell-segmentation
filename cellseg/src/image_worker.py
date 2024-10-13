@@ -1,8 +1,8 @@
 import mahotas as mh
+import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 from scipy import ndimage
-import matplotlib.pyplot as plt
 
 # Moje scripty
 import cellseg.src.convert_worker as cw

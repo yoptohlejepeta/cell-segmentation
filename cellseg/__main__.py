@@ -6,12 +6,11 @@ OUTPUT_PATH = "../Results/"
 
 import time
 
+import mahotas as mh
 from rich.console import Console
 from rich.markup import escape
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
-import mahotas as mh
-
 
 from cellseg.parser import parser
 from cellseg.src.script import check_dirs, img_processing_3
@@ -81,7 +80,7 @@ def main():  # noqa: ANN201, D103
                 )
                 continue
 
-            img_processing_3(img, mod_output)
+            img_processing_3(img, mod_output, steps=args.save_steps)
 
         finish_time = time.monotonic()
         elapsed_time = finish_time - start_time
