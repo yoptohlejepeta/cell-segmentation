@@ -10,10 +10,10 @@ import numpy as np
 from loguru import logger
 from skimage import filters
 
-import src.convert_worker as cw
-import src.image_worker as iw
-import src.shape_descriptors as sd
-import src.something as s
+import cellseg.src.convert_worker as cw
+import cellseg.src.image_worker as iw
+import cellseg.src.shape_descriptors as sd
+import cellseg.src.something as s
 
 # import src.visual_worker as vw
 
@@ -36,45 +36,30 @@ def create_directories_for_results(path: str, list_of_input_data: list[str]):
     return path
 
 
-def analysis(data_path: str, output_path: str) -> None:
+def check_dirs(data_path: str, output_path: str) -> tuple[list[str], str]:
     """Check the input and output paths.
-
-    Then proceed to process the images.
 
     Args:
     ----
         data_path (str): Directory with images to be processed.
-        output_path (str): Directory where the results will be saved.
-        note (str, optional): Note to be added to the output directory name. Defaults to "".
+        output_path (str): Directory for the output
+
+    Returns:
+    -------
+        tuple[list[str], str]: list of images, output_path
 
     """
+    list_of_input_data = get_names_from_directory(data_path)
+    mod_output = f"{output_path}output_images/"
     try:
-        list_of_input_data = get_names_from_directory(data_path)
-    except Exception as e:
-        logger.error("Something wrong with input path")
-        return
-    new_output = f"{output_path}output_images/"
-    try:
-        default_output_path = create_directories_for_results(new_output, list_of_input_data)
+        default_output_path = create_directories_for_results(mod_output, list_of_input_data)
     except Exception as e:
         logger.warning("Missing output path -> Creating default one")
-        os.mkdir("Results/")
-        os.mkdir("Results/output_images/")
+        Path("Results/").mkdir(parents=True, exist_ok=True)
+        Path("Results/output_images/").mkdir(parents=True, exist_ok=True)
         default_output_path = "Results/output_images/"
 
-    for i in list_of_input_data:
-        new_output = default_output_path + f"{i}/"
-
-        try:
-            input_data = data_path + i
-            img = mh.imread(input_data)
-        except Exception as e:
-            print(e)
-            logger.error("Something wrong with input data or input path")
-            continue
-
-        # Zde volám nějakou funkci co chce obrázek a outputpath nic jinýho zbytek volá ona
-        img_processing_3(img, new_output)  # FIXME
+    return list_of_input_data, default_output_path
 
 
 def img_processing_2(img, output_path):
@@ -396,8 +381,7 @@ def img_processing_3(img: np.ndarray, output_path: str) -> None:
     # ------------------ Zde kód pro analýzu ------------------------
     # Detekce jader
 
-    img_unsharp = iw.unsharp_mask_img(img)
-    plt.imsave(f"{output_path}01_unsharp_mask.jpg", img_unsharp)
+    img_unsharp = iw.unsharp_mask_img(img, output_path)
 
     r1, g1, b1 = cw.separate_layers(img_unsharp)
     plt.imsave(f"{output_path}02_1_red_channel_unsharp.jpg", r1, cmap="gray")
@@ -1251,18 +1235,3 @@ def nucleus(img, output_path):
         img, img_nuclei_boundary, width, height, [255, 0, 0]
     )
     plt.imsave(f"{output_path}18_boundary_in_original_img.jpg", img_boundary_in_original)
-
-
-if __name__ == "__main__":
-    #'''
-    start_time = datetime.datetime.now()
-
-    # DATA_PATH = "../Images/BAL_image2/"
-    DATA_PATH = "../Images/image/"
-    OUTPUT_PATH = "../Results/"
-    NOTE = "bal_labeled"
-
-    analysis(DATA_PATH, OUTPUT_PATH, NOTE)
-
-    finish_time = datetime.datetime.now()
-    logger.info(str(finish_time - start_time))

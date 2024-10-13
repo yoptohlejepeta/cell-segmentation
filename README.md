@@ -9,7 +9,7 @@ poetry install
 ## Run script
 
 ```bash
-poetry run python main.py --image_dir IMAGE_DIR --output_dir OUTPUT_DIR
+poetry run cellseg Images/image/
 ```
 
 ## TODO

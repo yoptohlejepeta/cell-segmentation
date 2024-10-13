@@ -2,9 +2,10 @@ import mahotas as mh
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 from scipy import ndimage
+import matplotlib.pyplot as plt
 
 # Moje scripty
-import src.convert_worker as cw
+import cellseg.src.convert_worker as cw
 
 
 def color_gradient(img, width, height):
@@ -61,13 +62,19 @@ def color_balancing(img, width, height):
 
 
 def unsharp_mask_img(
-    img: np.ndarray, radius: int = 10, percent: int = 300, threshold: int = 3
+    img: np.ndarray,
+    output_path: str,
+    radius: int = 10,
+    percent: int = 300,
+    threshold: int = 3,
+    steps: bool = False,
 ) -> np.ndarray:
     """Unsharp mask image.
 
     Args:
     ----
         img (np.ndarray): Image to be processed.
+        output_path (str): Path to save the processed image.
         radius (int, optional): Radius of the filter. Defaults to 10.
         percent (int, optional): Percentage of the sharpening. Defaults to 300.
         threshold (int, optional): Threshold of the filter. Defaults to 3.
@@ -82,8 +89,12 @@ def unsharp_mask_img(
     bmp = img_pil.filter(
         ImageFilter.UnsharpMask(radius=radius, percent=percent, threshold=threshold)
     )
+    img_unsharp = np.array(bmp)
 
-    return np.array(bmp)
+    if steps:
+        plt.imsave(f"{output_path}01_unsharp_mask.jpg", img_unsharp)
+
+    return img_unsharp
 
 
 def get_relabeled_image(img_labeled, width, height, exclude_first_index=True):

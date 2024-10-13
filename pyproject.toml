@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "segmentace-bunek"
+name = "cellseg"
 version = "0.1.0"
 description = ""
 authors = ["yoptohlejepeta <peta.kotlan@seznam.cz>"]
@@ -26,6 +26,9 @@ ipykernel = "^6.29.5"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.poetry.scripts]
+cellseg = "cellseg.__main__:main"
+
 
 [tool.ruff]
 line-length = 100
@@ -44,4 +47,6 @@ ignore = [
     "TD003", # missing todo link
     "FIX002", # line contains todo
     "DTZ005", # call datetime now without tzinfo
+    "FBT001", # Boolean-typed positional argument in function definition
+    "FBT002", # Boolean-typed positional argument in function definition
     ]
