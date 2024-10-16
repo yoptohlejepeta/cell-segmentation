@@ -49,4 +49,5 @@ ignore = [
     "DTZ005", # call datetime now without tzinfo
     "FBT001", # Boolean-typed positional argument in function definition
     "FBT002", # Boolean-typed positional argument in function definition
+    "FA100", # Add `from __future__ import annotations` to simplify `typing.Optional`
     ]

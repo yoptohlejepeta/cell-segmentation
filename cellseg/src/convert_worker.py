@@ -55,12 +55,19 @@ def convert_grayscale_to_bin(img, threshold_value=-1, less_than=True):
     return img_bin
 
 
-def convert_grayscale_to_bin_otsu(img):
+def convert_grayscale_to_bin_otsu(img: np.ndarray) -> np.ndarray:
+    """Convert a grayscale image to a binary image using Otsu's thresholding method.
+
+    Args:
+        img (np.ndarray): Grayscale image.
+
+    Returns:
+        np.ndarray: Binary image.
+
+    """
     img = img.astype(np.uint8)
     threshold_value = mh.otsu(img)
-    img_bin = img < threshold_value
-
-    return img_bin
+    return img < threshold_value
 
 
 def convert_labeled_to_bin(img, background=0):

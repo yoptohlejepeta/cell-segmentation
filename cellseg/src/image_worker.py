@@ -1,5 +1,4 @@
 import mahotas as mh
-import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 from scipy import ndimage
@@ -63,11 +62,9 @@ def color_balancing(img, width, height):
 
 def unsharp_mask_img(
     img: np.ndarray,
-    output_path: str,
     radius: int = 10,
     percent: int = 300,
     threshold: int = 3,
-    steps: bool = False,
 ) -> np.ndarray:
     """Unsharp mask image.
 
@@ -84,15 +81,12 @@ def unsharp_mask_img(
         np.ndarray: Processed image.
 
     """
-    img_pil = Image.fromarray(img, "RGB")
+    img_pil = Image.fromarray(img)
 
     bmp = img_pil.filter(
         ImageFilter.UnsharpMask(radius=radius, percent=percent, threshold=threshold)
     )
     img_unsharp = np.array(bmp)
-
-    if steps:
-        plt.imsave(f"{output_path}01_unsharp_mask.jpg", img_unsharp)
 
     return img_unsharp
 
@@ -241,7 +235,7 @@ def relabeling_background(img_labeled, width, height):
     return img_labeled
 
 
-def close_holes_remove_noise(img, mask_size=3, iterations=3):
+def close_holes_remove_noise(img, mask_size=3, iterations=5):
     img_bin = mh.close_holes(img)
 
     mask = np.ones((mask_size, mask_size))  # Občas se používá kernel
