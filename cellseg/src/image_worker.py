@@ -1,3 +1,5 @@
+from collections import deque
+
 import mahotas as mh
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
@@ -81,7 +83,7 @@ def unsharp_mask_img(
         np.ndarray: Processed image.
 
     """
-    img_pil = Image.fromarray(img)
+    img_pil = Image.fromarray(img, "RGB")
 
     bmp = img_pil.filter(
         ImageFilter.UnsharpMask(radius=radius, percent=percent, threshold=threshold)
@@ -235,9 +237,8 @@ def relabeling_background(img_labeled, width, height):
     return img_labeled
 
 
-def close_holes_remove_noise(img, mask_size=3, iterations=5):
+def close_holes_remove_noise(img: np.ndarray, mask_size: int = 3, iterations: int = 5):
     img_bin = mh.close_holes(img)
-
     mask = np.ones((mask_size, mask_size))  # Občas se používá kernel
 
     for k in range(iterations):
@@ -290,7 +291,6 @@ def find_nuclei_in_mask(img_grayscale, img_bin_mask, width, height):
 
     return img_bin_nuclei, img_grayscale_mask
 
-
 def flooding_cytoplasm(labeled_cytoplasm, labeled_nuclei, width, height):
     bin_cytoplasm = cw.convert_labeled_to_bin(labeled_cytoplasm)
     bin_nuclei = cw.convert_labeled_to_bin(labeled_nuclei)
@@ -330,35 +330,30 @@ def flooding_cytoplasm(labeled_cytoplasm, labeled_nuclei, width, height):
                         flag = True
                         continue
 
-                if i > 0 and j > 0:
-                    if labeled_nuclei_old[i - 1][j - 1] != 0:
-                        labeled_nuclei_new[i][j] = labeled_nuclei_old[i - 1][j - 1]
-                        flag = True
-                        continue
+                if i > 0 and j > 0 and labeled_nuclei_old[i - 1][j - 1] != 0:
+                    labeled_nuclei_new[i][j] = labeled_nuclei_old[i - 1][j - 1]
+                    flag = True
+                    continue
 
-                if j < width - 1:
-                    if labeled_nuclei_old[i][j + 1] != 0:
-                        labeled_nuclei_new[i][j] = labeled_nuclei_old[i][j + 1]
-                        flag = True
-                        continue
+                if j < width - 1 and labeled_nuclei_old[i][j + 1] != 0:
+                    labeled_nuclei_new[i][j] = labeled_nuclei_old[i][j + 1]
+                    flag = True
+                    continue
 
-                if j > 0:
-                    if labeled_nuclei_old[i][j - 1] != 0:
-                        labeled_nuclei_new[i][j] = labeled_nuclei_old[i][j - 1]
-                        flag = True
-                        continue
+                if j > 0 and labeled_nuclei_old[i][j - 1] != 0:
+                    labeled_nuclei_new[i][j] = labeled_nuclei_old[i][j - 1]
+                    flag = True
+                    continue
 
-                if i < height - 1:
-                    if labeled_nuclei_old[i + 1][j] != 0:
-                        labeled_nuclei_new[i][j] = labeled_nuclei_old[i + 1][j]
-                        flag = True
-                        continue
+                if i < height - 1 and labeled_nuclei_old[i + 1][j] != 0:
+                    labeled_nuclei_new[i][j] = labeled_nuclei_old[i + 1][j]
+                    flag = True
+                    continue
 
-                if i > 0:
-                    if labeled_nuclei_old[i - 1][j] != 0:
-                        labeled_nuclei_new[i][j] = labeled_nuclei_old[i - 1][j]
-                        flag = True
-                        continue
+                if i > 0 and labeled_nuclei_old[i - 1][j] != 0:
+                    labeled_nuclei_new[i][j] = labeled_nuclei_old[i - 1][j]
+                    flag = True
+                    continue
 
         labeled_nuclei_old = np.copy(labeled_nuclei_new)
 

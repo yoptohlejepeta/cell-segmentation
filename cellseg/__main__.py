@@ -63,7 +63,7 @@ def img_processing_with_steps(
     progress.update(
         task, description="[bold blue]Processing - Step 3/6: Otsu Binarization[/bold blue]"
     )
-    bin_otsu = cw.convert_grayscale_to_bin_otsu(g)
+    bin_otsu = cw.convert_grayscale_to_bin_otsu(0.2*r + 0.6*g + 0.2*b)
     if save_steps:
         plt.imsave(output_path / "02_bin_otsu.png", bin_otsu, cmap="gray")
     progress.advance(task)
@@ -79,7 +79,7 @@ def img_processing_with_steps(
     progress.update(
         task, description="[bold blue]Processing - Step 5/6: Distance Transform[/bold blue]"
     )
-    distance = cv2.distanceTransform(g_bin_otsu_morp.astype(np.uint8), cv2.DIST_L2, 5)
+    distance = mh.distance(g_bin_otsu_morp)
     if save_steps:
         plt.imsave(output_path / "04_distance.png", distance, cmap="gray")
     progress.advance(task)
@@ -89,7 +89,8 @@ def img_processing_with_steps(
     )
     local_maxi = morphology.local_maxima(distance)
     markers = measure.label(local_maxi)
-    labels = segmentation.watershed(-distance, markers, mask=g_bin_otsu_morp)
+    labels = segmentation.watershed(-distance, markers, mask=g_bin_otsu_morp, connectivity=5)
+
     if save_steps:
         plt.imsave(output_path / "05_watershed.png", labels, cmap="jet")
     progress.advance(task)
