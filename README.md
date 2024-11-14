@@ -33,9 +33,3 @@ Completed processing image: 2c.jpg.
 │ Processed 4 images in 19.56 seconds. │
 ╰──────────────────────────────────────╯
 ```
-
-## TODO
-
-- [ ] segmentovat jenom obaly (vypnout segmentaci jadra)
-    - fc `close_holes_remove_noise` upraven pocet defaultnich iteraci (3 -> 5)
-- [ ] pouzit na snimky Fridrich/LabeledData/Images
