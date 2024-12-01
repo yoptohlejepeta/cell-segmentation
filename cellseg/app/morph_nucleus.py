@@ -1,11 +1,7 @@
 import marimo
 
 __generated_with = "0.9.27"
-app = marimo.App(
-    width="medium",
-    app_title="Cell segmentation",
-    auto_download=["html"],
-)
+app = marimo.App(width="medium", app_title="Cell segmentation")
 
 
 @app.cell
