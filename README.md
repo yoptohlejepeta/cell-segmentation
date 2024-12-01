@@ -5,13 +5,13 @@ This repository contains a script for segmenting cells from images.
 ## Install dependencies
 
 ```bash
-poetry install
+uv sync
 ```
 
 ## Run script
 
 ```bash
-poetry run cellseg Images/test_images/ -o Results/ --save-steps
+uv run cellseg Images/test_images/ -o Results/ --save-steps
 ```
 
 ### Output
@@ -33,3 +33,7 @@ Completed processing image: 2c.jpg.
 │ Processed 4 images in 19.56 seconds. │
 ╰──────────────────────────────────────╯
 ```
+
+## Odkazy na články
+
+<https://www.sciencedirect.com/science/article/pii/S174680942100402X?casa_token=guMvylOtnCcAAAAA:egkrTmgl_iQlS44iW3CB5xMEZEQEk_m9pFcBStpRit9Poyubqg6gz32WpDIFBJek-z0pQIw>

@@ -1,3 +1,0 @@
-https://effectivesoftwaredesign.com/2019/02/27/data-science-set-similarity-metrics/
-
-https://medium.com/@ksakmann/vehicle-detection-and-tracking-using-hog-features-svm-vs-yolo-73e1ccb35866

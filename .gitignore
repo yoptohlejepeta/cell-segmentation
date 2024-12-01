@@ -162,7 +162,9 @@ cython_debug/
 #.idea/
 
 
-Results/*
-ignore/*
 test.ipynb
 *.db
+Images/*
+Labels/*
+Results/*
+Watershed/*
