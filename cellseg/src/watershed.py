@@ -26,7 +26,7 @@ def watershed_cytoplasm(
     label_path: Path,
 ) -> np.ndarray:
     """watershed
-    
+
     If label is provided, it will calculate the f1 score.
 
     Args:
@@ -43,21 +43,20 @@ def watershed_cytoplasm(
         label (np.ndarray, optional): Ground truth labels. Defaults to None.
 
     Returns:
-        np.ndarray: 
+        np.ndarray:
     """
     print(
         Panel(
-            f"Segmentation started!\n\n"
-            f"Image: {img_path.stem}\n",
+            f"Segmentation started!\n\n" f"Image: {img_path.stem}\n",
             title="Cytoplasm segmentation",
             border_style="yellow",
             expand=False,
         )
     )
-    
+
     img = mh.imread(img_path)
     label = np.load(label_path)
-    
+
     img_c_corrected = cca.automatic_color_equalization(
         img, slope=slope, limit=limit, samples=samples
     )
@@ -79,7 +78,7 @@ def watershed_cytoplasm(
     img_labeled_cytoplasm, nr_cytoplasm = mh.label(bin_cyto_nuclei)
     img_labeled_cytoplasm = iw.remove_small_regions(img_labeled_cytoplasm, min_size=min_size)
     cytoplasm = mh.labeled.remove_bordering(img_labeled_cytoplasm)
-    
+
     if label.any():
         f1 = f1_score(label.flatten(), cytoplasm.flatten(), average="micro")
         return cytoplasm, f1
@@ -98,7 +97,7 @@ def watershed_nucleus(
     label_path: Path,
 ) -> np.ndarray:
     """watershed
-    
+
     If label is provided, it will calculate the f1 score.
 
     Args:
@@ -112,33 +111,34 @@ def watershed_nucleus(
         label (np.ndarray, optional): Ground truth labels. Defaults to None.
 
     Returns:
-        np.ndarray: 
+        np.ndarray:
     """
     print(
         Panel(
-            f"Segmentation started!\n\n"
-            f"Image: {img_path.stem}\n",
+            f"Segmentation started!\n\n" f"Image: {img_path.stem}\n",
             title="Nucleus segmentation",
             border_style="yellow",
             expand=False,
         )
     )
-    
+
     img = mh.imread(img_path)
     label = np.load(label_path)
-    
+
     img_unsharp = iw.unsharp_mask_img(img, radius=radius, percent=percent, threshold=threshold)
     r1, g1, b1 = img_unsharp[:, :, 0], img_unsharp[:, :, 1], img_unsharp[:, :, 2]
-    
+
     b_bin_otsu = cw.convert_grayscale_to_bin_otsu(b1)
-    b_bin_otsu_morp = iw.close_holes_remove_noise(b_bin_otsu, mask_size=mask_size, iterations=iterations)
-    
-    img_labeled_nuclei, nr_nuclei = mh.label(b_bin_otsu_morp)
-    img_labeled_nuclei = iw.remove_small_regions(img_labeled_nuclei, min_size=min_size)
-    img_labeled_nuclei = mh.labeled.remove_bordering(img_labeled_nuclei)
-    
+    b_bin_otsu_morp = iw.close_holes_remove_noise(
+        b_bin_otsu, mask_size=mask_size, iterations=iterations
+    )
+
+    # img_labeled_nuclei, nr_nuclei = mh.label(b_bin_otsu_morp)
+    img_labeled_nuclei = iw.remove_small_regions(b_bin_otsu_morp, min_size=min_size)
+    # img_labeled_nuclei = mh.labeled.remove_bordering(img_labeled_nuclei)
+
     if label.any():
-        f1 = f1_score(label.flatten(), img_labeled_nuclei.flatten(), average="micro")
+        f1 = f1_score(label.flatten(), img_labeled_nuclei.flatten())
         return img_labeled_nuclei, f1
 
     return img_labeled_nuclei, None

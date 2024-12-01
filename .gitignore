@@ -164,7 +164,7 @@ cython_debug/
 
 test.ipynb
 *.db
-Images/*
-Labels/*
-Results/*
-Watershed/*
+cellseg/Images/*
+cellseg/Labels/*
+cellseg/Results/*
+cellseg/Watershed/*

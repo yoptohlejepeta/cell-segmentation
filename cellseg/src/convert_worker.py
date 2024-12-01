@@ -65,7 +65,7 @@ def convert_grayscale_to_bin_otsu(img: np.ndarray) -> np.ndarray:
         np.ndarray: Binary image.
 
     """
-    img = img.astype(np.uint8)  
+    img = img.astype(np.uint8)
     threshold_value = mh.otsu(img)
     return img < threshold_value
 
