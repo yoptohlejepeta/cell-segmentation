@@ -1,22 +1,41 @@
-from typing import Annotated, Callable, Coroutine
-from fastapi.responses import HTMLResponse, RedirectResponse
+"""Main module for the FastAPI app."""
+
+from pathlib import Path
+
 import marimo
-from fastapi import FastAPI, Form, Request, Response
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+from optuna.storages import RDBStorage
+from optuna_dashboard import wsgi
 
-
-# Create a marimo asgi app
 server = (
     marimo.create_asgi_app()
-    .with_app(path="", root="app/morph_nucleus.py")
+    .with_app(path="/watershed_nucleus", root="app/pages/watershed_nucleus.py")
+    .with_app(path="/svm", root="app/pages/svm.py")
 )
 
-# Create a FastAPI app
-app = FastAPI()
+storage = RDBStorage("sqlite:///params.db")
+optuna_app = wsgi(storage=storage)
+
+app = FastAPI(
+    redoc_url=None,
+    docs_url=None,
+)
+
+@app.get("/")
+def read_root() -> HTMLResponse:
+    """Return landing page.
+
+    Returns:
+        HTMLResponse: The landing page.
+
+    """
+    file_content = Path("app/land.html").read_text()
+    return HTMLResponse(
+        content=file_content,
+        status_code=200,
+    )
+
 
 app.mount("/", server.build())
-
-# Run the server
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="localhost", port=8000)
+app.mount("/optuna", optuna_app)

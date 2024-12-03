@@ -1,5 +1,3 @@
-from collections import deque
-
 import mahotas as mh
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
@@ -290,6 +288,7 @@ def find_nuclei_in_mask(img_grayscale, img_bin_mask, width, height):
     img_bin_nuclei = img_grayscale < threshold
 
     return img_bin_nuclei, img_grayscale_mask
+
 
 def flooding_cytoplasm(labeled_cytoplasm, labeled_nuclei, width, height):
     bin_cytoplasm = cw.convert_labeled_to_bin(labeled_cytoplasm)

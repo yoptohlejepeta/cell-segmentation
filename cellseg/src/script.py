@@ -311,8 +311,8 @@ def img_processing_3(img: np.ndarray, output_path: str, steps: bool) -> None:
     )
     plt.imsave(f"{output_path}38_boundary_final.jpg", img_original_boundary_cytoplasm_nuclei)
 
-if __name__=="__main__":
 
+if __name__ == "__main__":
     img = plt.imread("Images/BAL_images/2023_12_14_image_006.png")
 
     t1 = time.monotonic()

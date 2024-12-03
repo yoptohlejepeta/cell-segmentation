@@ -1,15 +1,16 @@
 from pathlib import Path
-from rich.panel import Panel
-from rich import print
-from rich.progress import BarColumn, Progress, SpinnerColumn, Task, TextColumn, TimeElapsedColumn
-import numpy as np
-from skimage import filters
-import mahotas as mh
+
 import colorcorrect.algorithm as cca
-import cellseg.src.image_worker as iw
-import cellseg.src.convert_worker as cw
+import mahotas as mh
+import numpy as np
+from rich import print
+from rich.panel import Panel
 from scipy.ndimage import gaussian_filter
+from skimage import filters
 from sklearn.metrics import f1_score
+
+import cellseg.src.convert_worker as cw
+import cellseg.src.image_worker as iw
 
 
 def watershed_cytoplasm(
@@ -44,6 +45,7 @@ def watershed_cytoplasm(
 
     Returns:
         np.ndarray:
+
     """
     print(
         Panel(
@@ -112,6 +114,7 @@ def watershed_nucleus(
 
     Returns:
         np.ndarray:
+
     """
     print(
         Panel(

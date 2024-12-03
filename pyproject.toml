@@ -27,6 +27,9 @@ dependencies = [
 [tool.uv]
 package = true
 
+[tool.setuptools]
+packages = ["cellseg"]
+
 [tool.ruff]
 line-length = 100
 

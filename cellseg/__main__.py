@@ -1,9 +1,7 @@
 """Main file."""
 
 from pathlib import Path
-from typing import Optional
 
-import cv2
 import mahotas as mh
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,8 +18,8 @@ def img_processing_with_steps(
     image_path: Path,
     output_path: Path,
     save_steps: bool = False,
-    task: Optional[Task] = None,
-    progress: Optional[Progress] = None,
+    task: Task | None = None,
+    progress: Progress | None = None,
 ) -> None:
     """Process an image.
 
@@ -63,7 +61,7 @@ def img_processing_with_steps(
     progress.update(
         task, description="[bold blue]Processing - Step 3/6: Otsu Binarization[/bold blue]"
     )
-    bin_otsu = cw.convert_grayscale_to_bin_otsu(0.2*r + 0.6*g + 0.2*b)
+    bin_otsu = cw.convert_grayscale_to_bin_otsu(0.2 * r + 0.6 * g + 0.2 * b)
     if save_steps:
         plt.imsave(output_path / "02_bin_otsu.png", bin_otsu, cmap="gray")
     progress.advance(task)
